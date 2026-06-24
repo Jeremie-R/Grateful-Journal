@@ -133,10 +133,70 @@ const TOKEN_VAR: Record<string, string> = {
   good: "var(--mood-good)",
 };
 
+/* greyscale palette for the "moments" donut, darkest -> lightest */
+const GREY_SCALE = ["#3f3f46", "#71717a", "#a1a1aa", "#cbd5e1", "#e4e4e7"];
+
+interface MomentSlice {
+  key: string;
+  label: string;
+  count: number;
+  pct: number;
+  fill: string;
+  iconColor: string;
+}
+
+const RADIAN = Math.PI / 180;
+
+function renderMomentIcon(props: {
+  cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number;
+  payload: MomentSlice;
+}) {
+  const { cx, cy, midAngle, innerRadius, outerRadius, payload } = props;
+  const r = innerRadius + (outerRadius - innerRadius) / 2;
+  const x = cx + r * Math.cos(-midAngle * RADIAN);
+  const y = cy + r * Math.sin(-midAngle * RADIAN);
+  const size = 16;
+  const def = specialByKey(payload.key);
+  if (!def) {
+    return (
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={13} fill={payload.iconColor}>
+        ⋯
+      </text>
+    );
+  }
+  const Icon = def.icon;
+  return <Icon x={x - size / 2} y={y - size / 2} width={size} height={size} color={payload.iconColor} />;
+}
+
 function YearView({ entries }: { entries: JournalEntry[] }) {
   const bars = useMemo(() => monthlyMoodBars(entries), [entries]);
   const specials = useMemo(() => specialDistribution(entries), [entries]);
+  const moments = useMemo<MomentSlice[]>(() => {
+    const total = specials.reduce((sum, s) => sum + s.count, 0) || 1;
+    const top = specials.slice(0, 4);
+    const restCount = specials.slice(4).reduce((sum, s) => sum + s.count, 0);
+    const arr: MomentSlice[] = top.map((s, i) => ({
+      key: s.key,
+      label: s.label,
+      count: s.count,
+      pct: Math.round((s.count / total) * 100),
+      fill: GREY_SCALE[i],
+      iconColor: i < 3 ? "#ffffff" : "#3f3f46",
+    }));
+    if (restCount > 0) {
+      arr.push({
+        key: "other",
+        label: "Other",
+        count: restCount,
+        pct: Math.round((restCount / total) * 100),
+        fill: GREY_SCALE[4],
+        iconColor: "#3f3f46",
+      });
+    }
+    return arr;
+  }, [specials]);
   const correlation = useMemo(() => specialMoodCorrelation(entries), [entries]);
+
 
   const hasData = entries.some((e) => e.mood != null);
   if (!hasData) return <Empty text="Not enough entries yet to show yearly trends." />;
@@ -162,7 +222,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         </div>
       </section>
 
-      {specials.length > 0 && (
+      {moments.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Your most noted moments
@@ -171,33 +231,34 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
-                  data={specials}
+                  data={moments}
                   dataKey="count"
                   nameKey="label"
                   innerRadius={45}
                   outerRadius={85}
                   paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270}
+                  labelLine={false}
+                  label={renderMomentIcon}
                 >
-                  {specials.map((s, i) => (
-                    <Cell key={s.key} fill={`var(--mood-${["sad", "mild", "avg", "okay", "good"][i % 5]})`} />
+                  {moments.map((s) => (
+                    <Cell key={s.key} fill={s.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }} />
+                <Tooltip
+                  formatter={(_v, _n, item: { payload?: MomentSlice }) => [
+                    `${item.payload?.pct}%`,
+                    item.payload?.label,
+                  ]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }}
+                />
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 pb-2">
-              {specials.map((s) => {
-                const Icon = specialByKey(s.key)!.icon;
-                return (
-                  <span key={s.key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Icon className="h-3.5 w-3.5" /> {s.label} ({s.count})
-                  </span>
-                );
-              })}
-            </div>
           </div>
         </section>
       )}
+
 
       {correlation.length > 0 && (
         <section>

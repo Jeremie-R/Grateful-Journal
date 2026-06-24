@@ -153,10 +153,10 @@ function AuthPage() {
               disabled={status === "sending"}
               className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {status === "sending" ? "Sending…" : "Send magic link"}
+              {status === "sending" ? "Sending…" : "Send magic link & code"}
             </button>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              No password needed — we'll email you a secure link to sign in.
+              No password needed — we'll email you a secure link and a one-time code.
             </p>
           </form>
         )}

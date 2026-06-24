@@ -476,6 +476,8 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
           }}
         />
       </div>
+
+      <InstallInstructionsSheet open={installOpen} onClose={() => setInstallOpen(false)} />
     </div>
   );
 }

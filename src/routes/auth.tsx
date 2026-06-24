@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, Mail, ArrowLeft } from "lucide-react";
+import { Heart, Mail, ArrowLeft, KeyRound } from "lucide-react";
 import { MoodFace } from "@/components/MoodFace";
+import { devLogin } from "@/lib/dev-auth.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -21,6 +23,36 @@ function AuthPage() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Test/admin login bypass
+  const runDevLogin = useServerFn(devLogin);
+  const [showDev, setShowDev] = useState(false);
+  const [devEmail, setDevEmail] = useState("");
+  const [devCode, setDevCode] = useState("");
+  const [devBusy, setDevBusy] = useState(false);
+  const [devError, setDevError] = useState<string | null>(null);
+
+  async function testLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!devEmail.trim() || !devCode.trim()) return;
+    setDevBusy(true);
+    setDevError(null);
+    try {
+      const session = await runDevLogin({
+        data: { email: devEmail.trim(), code: devCode.trim() },
+      });
+      const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+      if (error) throw error;
+      navigate({ to: "/" });
+    } catch (err) {
+      setDevError(err instanceof Error ? err.message : "Test login failed.");
+      setDevBusy(false);
+    }
+  }
+
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -160,7 +192,61 @@ function AuthPage() {
             </p>
           </form>
         )}
+
+        {/* Test / admin login bypass */}
+        <div className="mt-6 text-center">
+          {showDev ? (
+            <form onSubmit={testLogin} className="rounded-3xl border border-dashed border-border bg-card/60 p-5 text-left">
+              <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <KeyRound className="h-3.5 w-3.5" /> Test login
+              </p>
+              <input
+                type="email"
+                autoComplete="off"
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
+                placeholder="admin email"
+                className="mb-2 w-full rounded-2xl border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-ring"
+              />
+              <input
+                type="password"
+                autoComplete="off"
+                value={devCode}
+                onChange={(e) => setDevCode(e.target.value)}
+                placeholder="admin code"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-ring"
+              />
+              {devError && <p className="mt-2 text-sm text-destructive">{devError}</p>}
+              <button
+                type="submit"
+                disabled={devBusy}
+                className="mt-3 w-full rounded-2xl bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {devBusy ? "Signing in…" : "Enter app"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDev(false);
+                  setDevError(null);
+                }}
+                className="mt-3 block w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowDev(true)}
+              className="text-xs font-medium text-muted-foreground/70 hover:text-foreground"
+            >
+              Test login
+            </button>
+          )}
+        </div>
       </div>
+
     </div>
   );
 }

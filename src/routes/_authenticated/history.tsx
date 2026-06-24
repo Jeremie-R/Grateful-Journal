@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   moodDistribution, monthlyMoodBars, specialDistribution, specialMoodCorrelation,
 } from "@/lib/analytics";
-import { SPECIALS, specialByKey, type JournalEntry } from "@/lib/journal";
+import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
 import { BottomNav } from "@/components/BottomNav";
 

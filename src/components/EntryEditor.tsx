@@ -104,7 +104,7 @@ export function EntryEditor({ existing }: EntryEditorProps) {
 
         {/* How do you feel */}
         <section className="mt-6">
-          <h2 className="text-center text-xl font-bold">How do you feel today?</h2>
+          <h2 className="text-center text-xl font-bold">How do you feel?</h2>
 
           <div className="mt-6 flex items-end justify-between px-1">
             {MOODS.map((m) => (
@@ -147,7 +147,7 @@ export function EntryEditor({ existing }: EntryEditorProps) {
 
         {/* What was special */}
         <section className="mt-9">
-          <h2 className="text-center text-xl font-bold">What was special about today?</h2>
+          <h2 className="text-center text-xl font-bold">What is special about today?</h2>
           <div className="mt-5 grid grid-cols-4 gap-3">
             {SPECIALS.map((s) => {
               const Icon = s.icon;

@@ -455,6 +455,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
       {/* Actions */}
       <div className="space-y-2">
         <ActionRow icon={Download} label="Export my entries" onClick={exportEntries} />
+        <ActionRow icon={Smartphone} label="Add to home screen" onClick={() => setInstallOpen(true)} />
         <ActionRow icon={LogOut} label="Sign out" onClick={signOut} />
         <ActionRow
           icon={RotateCcw}

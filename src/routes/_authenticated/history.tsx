@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart, Bar, XAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
 } from "recharts";
-import { Sparkles, Download, RotateCcw, Trash2, LogOut, Pencil, Check } from "lucide-react";
+import { Sparkles, Download, RotateCcw, Trash2, LogOut, Pencil, Check, Smartphone } from "lucide-react";
 import { listEntries } from "@/lib/entries.functions";
 import { getProfile, updateNickname, deleteAccount } from "@/lib/profile.functions";
 import { generateReflection } from "@/lib/ai.functions";
@@ -17,6 +17,7 @@ import {
 import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
 import { BottomNav } from "@/components/BottomNav";
+import { InstallInstructionsSheet } from "@/components/AddToHomeScreen";
 
 export const Route = createFileRoute("/_authenticated/history")({
   component: HistoryPage,

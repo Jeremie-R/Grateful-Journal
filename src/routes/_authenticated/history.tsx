@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart, Bar, XAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
 } from "recharts";
-import { Sparkles, Download, RotateCcw, Trash2, LogOut, Pencil, Check } from "lucide-react";
+import { Sparkles, Download, RotateCcw, Trash2, LogOut, Pencil, Check, Smartphone } from "lucide-react";
 import { listEntries } from "@/lib/entries.functions";
 import { getProfile, updateNickname, deleteAccount } from "@/lib/profile.functions";
 import { generateReflection } from "@/lib/ai.functions";
@@ -17,6 +17,7 @@ import {
 import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
 import { BottomNav } from "@/components/BottomNav";
+import { InstallInstructionsSheet } from "@/components/AddToHomeScreen";
 
 export const Route = createFileRoute("/_authenticated/history")({
   component: HistoryPage,
@@ -315,6 +316,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
   const [nameDraft, setNameDraft] = useState("");
   const [summary, setSummary] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [installOpen, setInstallOpen] = useState(false);
 
   const nicknameMutation = useMutation({
     mutationFn: (nickname: string) => saveNickname({ data: { nickname: nickname || null } }),
@@ -453,6 +455,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
       {/* Actions */}
       <div className="space-y-2">
         <ActionRow icon={Download} label="Export my entries" onClick={exportEntries} />
+        <ActionRow icon={Smartphone} label="Add to home screen" onClick={() => setInstallOpen(true)} />
         <ActionRow icon={LogOut} label="Sign out" onClick={signOut} />
         <ActionRow
           icon={RotateCcw}
@@ -473,6 +476,8 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
           }}
         />
       </div>
+
+      <InstallInstructionsSheet open={installOpen} onClose={() => setInstallOpen(false)} />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, Mail, ArrowLeft } from "lucide-react";
+import { Heart, Mail, ArrowLeft, KeyRound } from "lucide-react";
 import { MoodFace } from "@/components/MoodFace";
+import { devLogin } from "@/lib/dev-auth.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({

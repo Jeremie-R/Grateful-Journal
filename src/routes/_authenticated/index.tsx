@@ -260,7 +260,6 @@ function EmptyState() {
   return (
     <div className="mt-20 flex flex-col items-center text-center">
       <div className="mb-5 flex items-center gap-1.5">
-        {SPECIALS.slice(0, 0)}
         {[0, 2, 4].map((l) => (
           <MoodFace key={l} level={l as 0 | 2 | 4} size={40} />
         ))}

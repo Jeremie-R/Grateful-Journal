@@ -31,7 +31,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Daily Bloom"
+const SITE_NAME = "Grateful"
 const SENDER_DOMAIN = "notify.grateful.app.roberrini.com"
 const ROOT_DOMAIN = "grateful.app.roberrini.com"
 const FROM_DOMAIN = "grateful.app.roberrini.com"

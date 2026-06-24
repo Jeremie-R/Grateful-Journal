@@ -258,7 +258,7 @@ function HomeScreenBanner() {
   );
 }
 
-
+function DayRow({ day }: { day: DayGroup }) {
   return (
     <div className="flex gap-3">
       {/* Date chip */}

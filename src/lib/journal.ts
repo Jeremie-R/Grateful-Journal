@@ -18,16 +18,16 @@ export interface MoodDef {
   label: string;
   /** tailwind token name suffix, e.g. "sad" -> bg-mood-sad */
   token: "sad" | "mild" | "avg" | "okay" | "good";
-  /** mouth line angle in degrees (negative = sad frown, positive = smile) */
-  angle: number;
+  /** mouth curvature from -1 (frown / sad) to 1 (smile / happy) */
+  curve: number;
 }
 
 export const MOODS: MoodDef[] = [
-  { level: 0, key: "sad", label: "Sad", token: "sad", angle: -22 },
-  { level: 1, key: "mild", label: "Mild", token: "mild", angle: -10 },
-  { level: 2, key: "average", label: "Average", token: "avg", angle: 0 },
-  { level: 3, key: "okay", label: "Okay", token: "okay", angle: 10 },
-  { level: 4, key: "good", label: "Good", token: "good", angle: 22 },
+  { level: 0, key: "sad", label: "Sad", token: "sad", curve: -1 },
+  { level: 1, key: "mild", label: "Mild", token: "mild", curve: -0.5 },
+  { level: 2, key: "average", label: "Average", token: "avg", curve: 0 },
+  { level: 3, key: "okay", label: "Okay", token: "okay", curve: 0.5 },
+  { level: 4, key: "good", label: "Good", token: "good", curve: 1 },
 ];
 
 export function moodByLevel(level: number | null | undefined): MoodDef | null {

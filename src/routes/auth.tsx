@@ -128,9 +128,9 @@ function AuthPage() {
             <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full" style={{ background: "var(--mood-good-soft)" }}>
               <Mail className="h-6 w-6" />
             </div>
-            <h2 className="text-lg font-semibold">Check your inbox</h2>
+            <h2 className="text-lg font-semibold">Enter your code</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We emailed <span className="font-medium text-foreground">{email}</span>. Tap the magic link, or enter the code below to sign in right here.
+              We emailed a 6-digit code to <span className="font-medium text-foreground">{email}</span>. Type it below to sign in right here and stay logged in.
             </p>
 
             <form onSubmit={verifyCode} className="mt-5">
@@ -185,10 +185,10 @@ function AuthPage() {
               disabled={status === "sending"}
               className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {status === "sending" ? "Sending…" : "Send magic link & code"}
+              {status === "sending" ? "Sending…" : "Email me a sign-in code"}
             </button>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              No password needed — we'll email you a secure link and a one-time code.
+              No password needed — we'll email a 6-digit code you type in here. (A magic link is included too.)
             </p>
           </form>
         )}

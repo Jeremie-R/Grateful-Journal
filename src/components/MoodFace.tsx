@@ -55,15 +55,21 @@ export function MoodFace({
       }}
     >
       {showLine && (
-        <span
-          className="block rounded-full bg-foreground/70"
-          style={{
-            width: lineWidth,
-            height: Math.max(2, size * 0.05),
-            transform: `rotate(${mood.angle}deg)`,
-            marginTop: size * 0.16,
-          }}
-        />
+        <svg
+          width={mouthW}
+          height={mouthH}
+          viewBox={`0 0 ${mouthW} ${mouthH}`}
+          fill="none"
+          style={{ marginTop: size * 0.14, overflow: "visible" }}
+          aria-hidden
+        >
+          <path
+            d={path}
+            className="stroke-foreground/70"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+          />
+        </svg>
       )}
     </Wrapper>
   );

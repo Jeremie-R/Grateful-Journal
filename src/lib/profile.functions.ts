@@ -40,3 +40,13 @@ export const updateNickname = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
+export const deleteAccount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Cascades to profiles and entries via ON DELETE CASCADE
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

@@ -108,22 +108,14 @@ export function EntryEditor({ existing }: EntryEditorProps) {
 
           <div className="mt-6 flex items-end justify-between px-1">
             {MOODS.map((m) => (
-              <div key={m.level} className="flex flex-col items-center gap-2">
-                <MoodFace
-                  level={m.level}
-                  size={54}
-                  selected={mood === m.level}
-                  dimmed={mood != null && mood !== m.level}
-                  onClick={() => setMood(m.level)}
-                />
-                <span
-                  className={`text-[0.7rem] font-medium transition-opacity ${
-                    mood === m.level ? "text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  {m.label}
-                </span>
-              </div>
+              <MoodFace
+                key={m.level}
+                level={m.level}
+                size={54}
+                selected={mood === m.level}
+                dimmed={mood != null && mood !== m.level}
+                onClick={() => setMood(m.level)}
+              />
             ))}
           </div>
 

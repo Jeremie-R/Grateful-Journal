@@ -24,6 +24,36 @@ function AuthPage() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Test/admin login bypass
+  const runDevLogin = useServerFn(devLogin);
+  const [showDev, setShowDev] = useState(false);
+  const [devEmail, setDevEmail] = useState("");
+  const [devCode, setDevCode] = useState("");
+  const [devBusy, setDevBusy] = useState(false);
+  const [devError, setDevError] = useState<string | null>(null);
+
+  async function testLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!devEmail.trim() || !devCode.trim()) return;
+    setDevBusy(true);
+    setDevError(null);
+    try {
+      const session = await runDevLogin({
+        data: { email: devEmail.trim(), code: devCode.trim() },
+      });
+      const { error } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+      if (error) throw error;
+      navigate({ to: "/" });
+    } catch (err) {
+      setDevError(err instanceof Error ? err.message : "Test login failed.");
+      setDevBusy(false);
+    }
+  }
+
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/" });

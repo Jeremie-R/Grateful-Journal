@@ -222,7 +222,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         </div>
       </section>
 
-      {specials.length > 0 && (
+      {moments.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Your most noted moments
@@ -231,33 +231,34 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
-                  data={specials}
+                  data={moments}
                   dataKey="count"
                   nameKey="label"
                   innerRadius={45}
                   outerRadius={85}
                   paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270}
+                  labelLine={false}
+                  label={renderMomentIcon}
                 >
-                  {specials.map((s, i) => (
-                    <Cell key={s.key} fill={`var(--mood-${["sad", "mild", "avg", "okay", "good"][i % 5]})`} />
+                  {moments.map((s) => (
+                    <Cell key={s.key} fill={s.fill} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }} />
+                <Tooltip
+                  formatter={(_v, _n, item: { payload?: MomentSlice }) => [
+                    `${item.payload?.pct}%`,
+                    item.payload?.label,
+                  ]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }}
+                />
               </PieChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 pb-2">
-              {specials.map((s) => {
-                const Icon = specialByKey(s.key)!.icon;
-                return (
-                  <span key={s.key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Icon className="h-3.5 w-3.5" /> {s.label} ({s.count})
-                  </span>
-                );
-              })}
-            </div>
           </div>
         </section>
       )}
+
 
       {correlation.length > 0 && (
         <section>

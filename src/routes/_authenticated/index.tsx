@@ -6,7 +6,6 @@ import { Search, X, Heart } from "lucide-react";
 import { listEntries } from "@/lib/entries.functions";
 import {
   MOODS,
-  SPECIALS,
   moodSoftColor,
   specialByKey,
   type JournalEntry,

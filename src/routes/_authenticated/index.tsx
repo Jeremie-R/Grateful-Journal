@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, X, Heart } from "lucide-react";
 import { listEntries } from "@/lib/entries.functions";
+import { getProfile, dismissHomescreenPrompt } from "@/lib/profile.functions";
 import {
   MOODS,
   moodSoftColor,
@@ -12,10 +13,15 @@ import {
 } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
 import { BottomNav } from "@/components/BottomNav";
+import {
+  InstallInstructionsSheet,
+  useIsInstallable,
+} from "@/components/AddToHomeScreen";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: JournalPage,
 });
+
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = [

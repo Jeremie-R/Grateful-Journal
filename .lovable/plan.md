@@ -1,44 +1,54 @@
-# Keep the phone logged in
+# Add to Home Screen — banner + button
 
-## Why it's happening
-The session client is already configured correctly (`persistSession: true`, `autoRefreshToken: true`, `localStorage`). The problem is iOS-specific:
+## Goal
+On mobile, show a small, friendly banner on the home screen that encourages adding **Grateful** to the phone's home screen. It appears **once per user account** (dismissable), and is hidden forever after the user dismisses it or once the app is already installed. Also add a permanent **"Add to home screen"** button in the *About you* section, directly under *Export my entries*, that re-opens the same install instructions on demand.
 
-- You opened the app from a **Home Screen icon**, which iOS runs as a *standalone web-clip* with its **own private storage**, isolated from the normal Safari browser.
-- You sign in by pasting the magic link into the **Safari browser**, so the session lands in Safari's storage — the home-screen app never receives it.
-- A site that isn't a real installable PWA also gets weaker, more easily-evicted storage on iOS.
+## Where things live today
+- Home screen: `src/routes/_authenticated/index.tsx`
+- *About you* tab (with *Export my entries*): inside `src/routes/_authenticated/history.tsx`
+- Profile read/write server functions: `src/lib/profile.functions.ts`
+- PWA manifest + iOS meta tags: already configured in `src/routes/__root.tsx`
 
-## The fix (two parts)
+## 1. Persist "seen" state per account (database)
+Add one column to the `profiles` table so the dismissed state follows the user across devices:
 
-### 1. Make Grateful a real installable app (manifest-only PWA)
-This gives the home-screen instance a proper standalone container with durable storage, so a session saved there survives relaunches.
+```text
+homescreen_prompt_dismissed  boolean  not null  default false
+```
 
-- Add `public/manifest.webmanifest` with `name`, `short_name` ("Grateful"), `display: "standalone"`, `start_url: "/"`, `theme_color`, `background_color`, and icon entries.
-- Generate app icons (heart mark in the app's pastel/charcoal style) into `public/`: `icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, and `apple-touch-icon.png` (180×180).
-- Add the matching head tags in `src/routes/__root.tsx` `head()`:
-  - `link rel="manifest"` → `/manifest.webmanifest`
-  - `link rel="apple-touch-icon"` → `/apple-touch-icon.png`
-  - `meta name="apple-mobile-web-app-capable" content="yes"` (enables true standalone mode on iOS)
-  - `meta name="apple-mobile-web-app-status-bar-style"`
-  - `meta name="apple-mobile-web-app-title" content="Grateful"`
-  - `meta name="theme-color"`
+Done via a migration (no new GRANTs needed — `profiles` already grants the needed privileges and has user-scoped RLS).
 
-No service worker and no offline caching — per Lovable's PWA guidance, this is the minimal "Add to Home Screen" path, and service workers are deliberately avoided so previews don't break.
+## 2. Backend wiring (`src/lib/profile.functions.ts`)
+- Extend `getProfile`'s `select(...)` to include `homescreen_prompt_dismissed` (and the same in `updateNickname`'s return so the cache stays consistent).
+- Add a new `dismissHomescreenPrompt` server function (`requireSupabaseAuth`) that sets `homescreen_prompt_dismissed = true` for the current user and returns the updated row.
 
-### 2. Steer mobile sign-in to the in-app code (so auth happens inside the app)
-The current `/auth` screen already supports typing the emailed 6-digit code directly in the app — that path stores the session in whatever container you're in. We'll make that the obvious primary path on mobile so you never have to hop to a different browser:
+## 3. Shared install helper + instructions component
+Create `src/components/AddToHomeScreen.tsx` containing:
+- A small `useIsInstallable()` helper that detects:
+  - mobile (touch / small viewport via `matchMedia`),
+  - whether the app is **already** running standalone (`navigator.standalone` on iOS or `display-mode: standalone`) — if installed, suppress everything.
+- An `InstallInstructionsSheet` (a lightweight bottom sheet / modal styled with existing tokens — card, rounded-3xl, charcoal-on-off-white, no new accent colors) that explains the steps. Because iOS Safari has no programmatic install prompt, the copy gives the tap-by-tap path: **Share → Add to Home Screen**. On Android/Chrome, if a `beforeinstallprompt` event was captured, show a native **Install** button; otherwise show the same menu instructions.
 
-- Reword the `/auth` copy to lead with "Enter the 6-digit code from the email" and present the magic link as secondary.
-- Keep the existing code-entry form; just make it the prominent action.
+## 4. Home-screen banner (`src/routes/_authenticated/index.tsx`)
+- Read the profile via TanStack Query (`["profile"]`, same key already used in History).
+- Render a small dismissable banner at the top of the journal list **only when all are true**: on mobile, not already installed, and `profile.homescreen_prompt_dismissed === false`.
+- Banner: compact rounded card with the app heart mark, one line like *"Add Grateful to your home screen for one-tap journaling"*, an **Add** action (opens the instructions sheet) and an **×** dismiss.
+- Dismissing (the × or completing via the sheet) calls `dismissHomescreenPrompt`, then invalidates `["profile"]` so it never returns for that account.
 
-## What you'll do once after this ships
-1. Re-add the app to your Home Screen (so iOS picks up the new standalone manifest).
-2. Open it from the icon, enter your email, then type the **6-digit code** from the email into the app (no need to open the link in another browser).
-3. From then on the home-screen app should keep you signed in across launches.
+## 5. "Add to home screen" button in About you (`history.tsx`)
+- Add a new `ActionRow` with a phone/download-style icon labeled **"Add to home screen"**, placed immediately under the existing *Export my entries* row.
+- Clicking it opens the same `InstallInstructionsSheet`. This is always available (it does not depend on the dismissed flag), so users who dismissed the banner can still find it.
+- On desktop this row can stay visible (instructions note it's a phone feature) — keeping it simple and avoiding conditional clutter.
 
-## Notes / caveats
-- iOS caches manifest fields at install time, so the one-time re-add above is needed to switch into true standalone mode.
-- iOS can still evict storage after ~7 days of no use; installed standalone apps are treated more durably than plain bookmarks, so this is the most reliable option available to a web app. If you ever want sessions that survive even long gaps, the next step would be a native wrapper, which is a separate, larger effort.
+## Notes / constraints
+- Manifest-only PWA is already set up; no service worker, no offline behavior, no new caching — consistent with current setup.
+- No new colors: banner and sheet use existing greyscale/charcoal tokens only.
+- The dismissed state is per account (stored in `profiles`), as requested.
 
-## Technical details
-- Files: new `public/manifest.webmanifest`, new icon PNGs in `public/`, edits to `src/routes/__root.tsx` (head tags) and `src/routes/auth.tsx` (copy/emphasis only).
-- No changes to `src/integrations/supabase/client.ts` (already correct) and no auth/business-logic changes.
+## Technical summary
+- Migration: `ALTER TABLE public.profiles ADD COLUMN homescreen_prompt_dismissed boolean NOT NULL DEFAULT false;`
+- `profile.functions.ts`: include new column in selects; add `dismissHomescreenPrompt` server fn.
+- New `src/components/AddToHomeScreen.tsx`: install detection helper + instructions sheet (reused by banner and About button).
+- `index.tsx`: conditional banner gated on mobile + not-installed + not-dismissed; wired to `["profile"]` query and dismiss mutation.
+- `history.tsx`: new `ActionRow` under *Export my entries* opening the instructions sheet.
+- Regenerate Supabase types after the migration so `homescreen_prompt_dismissed` is typed.

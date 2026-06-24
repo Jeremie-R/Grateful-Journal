@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN homescreen_prompt_dismissed boolean NOT NULL DEFAULT false;

@@ -7,7 +7,7 @@ export const getProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("profiles")
-      .select("id, nickname, created_at")
+      .select("id, nickname, created_at, homescreen_prompt_dismissed")
       .eq("user_id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -17,7 +17,7 @@ export const getProfile = createServerFn({ method: "GET" })
       const { data: created, error: createErr } = await context.supabase
         .from("profiles")
         .insert({ user_id: context.userId })
-        .select("id, nickname, created_at")
+        .select("id, nickname, created_at, homescreen_prompt_dismissed")
         .maybeSingle();
       if (createErr) throw new Error(createErr.message);
       return created;
@@ -35,7 +35,20 @@ export const updateNickname = createServerFn({ method: "POST" })
       .from("profiles")
       .update({ nickname: data.nickname })
       .eq("user_id", context.userId)
-      .select("id, nickname, created_at")
+      .select("id, nickname, created_at, homescreen_prompt_dismissed")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const dismissHomescreenPrompt = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: row, error } = await context.supabase
+      .from("profiles")
+      .update({ homescreen_prompt_dismissed: true })
+      .eq("user_id", context.userId)
+      .select("id, nickname, created_at, homescreen_prompt_dismissed")
       .maybeSingle();
     if (error) throw new Error(error.message);
     return row;

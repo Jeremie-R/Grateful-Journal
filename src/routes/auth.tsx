@@ -98,10 +98,35 @@ function AuthPage() {
             </div>
             <h2 className="text-lg font-semibold">Check your inbox</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We sent a magic link to <span className="font-medium text-foreground">{email}</span>. Tap it to sign in.
+              We emailed <span className="font-medium text-foreground">{email}</span>. Tap the magic link, or enter the code below to sign in right here.
             </p>
+
+            <form onSubmit={verifyCode} className="mt-5">
+              <input
+                id="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="••••••"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-center text-2xl font-semibold tracking-[0.4em] outline-none transition-colors focus:border-ring"
+              />
+              {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+              <button
+                type="submit"
+                disabled={verifying || code.length < 6}
+                className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {verifying ? "Verifying…" : "Sign in with code"}
+              </button>
+            </form>
+
             <button
-              onClick={() => setStatus("idle")}
+              onClick={() => {
+                setStatus("idle");
+                setCode("");
+                setError(null);
+              }}
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" /> Use a different email

@@ -115,6 +115,9 @@ function JournalPage() {
         </button>
       </header>
 
+      <HomeScreenBanner />
+
+
       {searchOpen && (
         <input
           autoFocus

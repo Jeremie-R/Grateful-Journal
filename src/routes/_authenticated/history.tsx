@@ -316,6 +316,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
   const [nameDraft, setNameDraft] = useState("");
   const [summary, setSummary] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [installOpen, setInstallOpen] = useState(false);
 
   const nicknameMutation = useMutation({
     mutationFn: (nickname: string) => saveNickname({ data: { nickname: nickname || null } }),

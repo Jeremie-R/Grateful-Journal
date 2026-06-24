@@ -208,9 +208,12 @@ function DayRow({ day }: { day: DayGroup }) {
 
 function EntryCard({ entry }: { entry: JournalEntry }) {
   const navigate = useNavigate();
+  const hasBody = !!entry.gratitude?.trim() || !!entry.note?.trim();
+  const moodLabel = entry.mood != null ? MOODS[entry.mood].label : null;
   return (
     <button
       onClick={() => navigate({ to: "/entry/$id", params: { id: entry.id } })}
+      aria-label={!hasBody && moodLabel ? `Feeling ${moodLabel.toLowerCase()}` : undefined}
       className="block w-full rounded-3xl p-4 text-left transition-transform active:scale-[0.99]"
       style={{ backgroundColor: moodSoftColor(entry.mood) }}
     >
@@ -244,11 +247,6 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       )}
       {entry.note?.trim() && (
         <p className="mt-1 line-clamp-2 text-sm text-foreground/55">{entry.note}</p>
-      )}
-      {!entry.gratitude?.trim() && !entry.note?.trim() && entry.mood != null && (
-        <p className="mt-2 text-sm text-foreground/50">
-          Feeling {MOODS[entry.mood].label.toLowerCase()}.
-        </p>
       )}
     </button>
   );

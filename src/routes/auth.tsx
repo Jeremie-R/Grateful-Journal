@@ -128,9 +128,9 @@ function AuthPage() {
             <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full" style={{ background: "var(--mood-good-soft)" }}>
               <Mail className="h-6 w-6" />
             </div>
-            <h2 className="text-lg font-semibold">Check your inbox</h2>
+            <h2 className="text-lg font-semibold">Enter your code</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We emailed <span className="font-medium text-foreground">{email}</span>. Tap the magic link, or enter the code below to sign in right here.
+              We emailed a 6-digit code to <span className="font-medium text-foreground">{email}</span>. Type it below to sign in right here and stay logged in.
             </p>
 
             <form onSubmit={verifyCode} className="mt-5">

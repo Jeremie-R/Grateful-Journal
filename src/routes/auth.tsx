@@ -17,7 +17,9 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,6 +42,25 @@ function AuthPage() {
       setError(error.message);
     } else {
       setStatus("sent");
+    }
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault();
+    const token = code.trim();
+    if (token.length < 6) return;
+    setVerifying(true);
+    setError(null);
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token,
+      type: "email",
+    });
+    if (error) {
+      setError(error.message);
+      setVerifying(false);
+    } else {
+      navigate({ to: "/" });
     }
   }
 
@@ -77,10 +98,35 @@ function AuthPage() {
             </div>
             <h2 className="text-lg font-semibold">Check your inbox</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We sent a magic link to <span className="font-medium text-foreground">{email}</span>. Tap it to sign in.
+              We emailed <span className="font-medium text-foreground">{email}</span>. Tap the magic link, or enter the code below to sign in right here.
             </p>
+
+            <form onSubmit={verifyCode} className="mt-5">
+              <input
+                id="code"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="••••••"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-3 text-center text-2xl font-semibold tracking-[0.4em] outline-none transition-colors focus:border-ring"
+              />
+              {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+              <button
+                type="submit"
+                disabled={verifying || code.length < 6}
+                className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {verifying ? "Verifying…" : "Sign in with code"}
+              </button>
+            </form>
+
             <button
-              onClick={() => setStatus("idle")}
+              onClick={() => {
+                setStatus("idle");
+                setCode("");
+                setError(null);
+              }}
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" /> Use a different email
@@ -107,10 +153,10 @@ function AuthPage() {
               disabled={status === "sending"}
               className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {status === "sending" ? "Sending…" : "Send magic link"}
+              {status === "sending" ? "Sending…" : "Send magic link & code"}
             </button>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              No password needed — we'll email you a secure link to sign in.
+              No password needed — we'll email you a secure link and a one-time code.
             </p>
           </form>
         )}

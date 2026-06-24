@@ -28,9 +28,10 @@ export function MoodFace({
   const mouthW = size * 0.46;
   const mouthH = size * 0.22;
   const stroke = Math.max(2, size * 0.055);
-  // Quadratic curve: control point dips down for frown, up for smile.
-  const cpY = mouthH / 2 - mood.curve * (mouthH / 2);
-  const startY = mouthH / 2 + mood.curve * (mouthH / 2) * 0.5;
+  // Quadratic curve: smile (curve>0) lifts the corners and drops the middle,
+  // frown (curve<0) does the opposite.
+  const cpY = mouthH / 2 + mood.curve * (mouthH / 2);
+  const startY = mouthH / 2 - mood.curve * (mouthH / 2) * 0.5;
   const path = `M 0 ${startY} Q ${mouthW / 2} ${cpY} ${mouthW} ${startY}`;
   const Wrapper = onClick ? "button" : "div";
 

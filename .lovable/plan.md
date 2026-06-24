@@ -1,54 +1,59 @@
-# Add to Home Screen — banner + button
+# Fixing the email DNS so login codes send
 
-## Goal
-On mobile, show a small, friendly banner on the home screen that encourages adding **Grateful** to the phone's home screen. It appears **once per user account** (dismissable), and is hidden forever after the user dismisses it or once the app is already installed. Also add a permanent **"Add to home screen"** button in the *About you* section, directly under *Export my entries*, that re-opens the same install instructions on demand.
+## What's actually wrong
 
-## Where things live today
-- Home screen: `src/routes/_authenticated/index.tsx`
-- *About you* tab (with *Export my entries*): inside `src/routes/_authenticated/history.tsx`
-- Profile read/write server functions: `src/lib/profile.functions.ts`
-- PWA manifest + iOS meta tags: already configured in `src/routes/__root.tsx`
+Your login-code (magic-link) emails are sent from the subdomain `notify.grateful.app.roberrini.com`. For that to work, you delegated this subdomain to Lovable's nameservers by adding two `NS` records at OVH.
 
-## 1. Persist "seen" state per account (database)
-Add one column to the `profiles` table so the dismissed state follows the user across devices:
+The problem is in how OVH saved those `NS` values. The intended values are:
 
 ```text
-homescreen_prompt_dismissed  boolean  not null  default false
+ns7.lovable.cloud
+ns8.lovable.cloud
 ```
 
-Done via a migration (no new GRANTs needed — `profiles` already grants the needed privileges and has user-scoped RLS).
+But OVH stored them as:
 
-## 2. Backend wiring (`src/lib/profile.functions.ts`)
-- Extend `getProfile`'s `select(...)` to include `homescreen_prompt_dismissed` (and the same in `updateNickname`'s return so the cache stays consistent).
-- Add a new `dismissHomescreenPrompt` server function (`requireSupabaseAuth`) that sets `homescreen_prompt_dismissed = true` for the current user and returns the updated row.
+```text
+ns7.lovable.cloud.roberrini.com
+ns8.lovable.cloud.roberrini.com
+```
 
-## 3. Shared install helper + instructions component
-Create `src/components/AddToHomeScreen.tsx` containing:
-- A small `useIsInstallable()` helper that detects:
-  - mobile (touch / small viewport via `matchMedia`),
-  - whether the app is **already** running standalone (`navigator.standalone` on iOS or `display-mode: standalone`) — if installed, suppress everything.
-- An `InstallInstructionsSheet` (a lightweight bottom sheet / modal styled with existing tokens — card, rounded-3xl, charcoal-on-off-white, no new accent colors) that explains the steps. Because iOS Safari has no programmatic install prompt, the copy gives the tap-by-tap path: **Share → Add to Home Screen**. On Android/Chrome, if a `beforeinstallprompt` event was captured, show a native **Install** button; otherwise show the same menu instructions.
+This is the classic OVH "missing trailing dot" trap: when an `NS` value is entered **without a trailing dot**, OVH treats it as a name *relative to your zone* and appends `.roberrini.com`. Those `ns7.lovable.cloud.roberrini.com` / `ns8.lovable.cloud.roberrini.com` hosts don't exist, so they have no A/AAAA records — which is exactly the anomaly OVH reported. Result: the subdomain never delegates to Lovable, DNS verification stays "Pending," and no email (including login codes) goes out.
 
-## 4. Home-screen banner (`src/routes/_authenticated/index.tsx`)
-- Read the profile via TanStack Query (`["profile"]`, same key already used in History).
-- Render a small dismissable banner at the top of the journal list **only when all are true**: on mobile, not already installed, and `profile.homescreen_prompt_dismissed === false`.
-- Banner: compact rounded card with the app heart mark, one line like *"Add Grateful to your home screen for one-tap journaling"*, an **Add** action (opens the instructions sheet) and an **×** dismiss.
-- Dismissing (the × or completing via the sheet) calls `dismissHomescreenPrompt`, then invalidates `["profile"]` so it never returns for that account.
+This is a DNS change at your registrar (OVH). I can't edit your OVH zone from here, so this part has to be done by you — but it's a 2-minute fix.
 
-## 5. "Add to home screen" button in About you (`history.tsx`)
-- Add a new `ActionRow` with a phone/download-style icon labeled **"Add to home screen"**, placed immediately under the existing *Export my entries* row.
-- Clicking it opens the same `InstallInstructionsSheet`. This is always available (it does not depend on the dismissed flag), so users who dismissed the banner can still find it.
-- On desktop this row can stay visible (instructions note it's a phone feature) — keeping it simple and avoiding conditional clutter.
+## What you need to do at OVH
 
-## Notes / constraints
-- Manifest-only PWA is already set up; no service worker, no offline behavior, no new caching — consistent with current setup.
-- No new colors: banner and sheet use existing greyscale/charcoal tokens only.
-- The dismissed state is per account (stored in `profiles`), as requested.
+1. Log in to OVH → your domain `roberrini.com` → **DNS zone**.
+2. Find the two `NS` records for the subdomain `notify.grateful.app` (they currently show targets ending in `ns7.lovable.cloud.roberrini.com` and `ns8.lovable.cloud.roberrini.com`).
+3. Edit each one so the target is the **fully qualified name with a trailing dot**:
 
-## Technical summary
-- Migration: `ALTER TABLE public.profiles ADD COLUMN homescreen_prompt_dismissed boolean NOT NULL DEFAULT false;`
-- `profile.functions.ts`: include new column in selects; add `dismissHomescreenPrompt` server fn.
-- New `src/components/AddToHomeScreen.tsx`: install detection helper + instructions sheet (reused by banner and About button).
-- `index.tsx`: conditional banner gated on mobile + not-installed + not-dismissed; wired to `["profile"]` query and dismiss mutation.
-- `history.tsx`: new `ActionRow` under *Export my entries* opening the instructions sheet.
-- Regenerate Supabase types after the migration so `homescreen_prompt_dismissed` is typed.
+```text
+ns7.lovable.cloud.
+ns8.lovable.cloud.
+```
+
+The trailing dot is the important part — it tells OVH "this is the complete name, don't append my domain."
+
+4. Save / deploy the zone. OVH should stop reporting the "no address records" anomaly once the targets are correct.
+
+```text
+Subdomain:  notify.grateful.app   (i.e. notify.grateful.app.roberrini.com)
+Type:       NS
+Target 1:   ns7.lovable.cloud.    ← note the trailing dot
+Target 2:   ns8.lovable.cloud.    ← note the trailing dot
+```
+
+## After the DNS fix
+
+1. DNS changes can take anywhere from a few minutes up to 72 hours to propagate.
+2. Once propagated, the email domain verifies automatically. You can re-check status in **Cloud → Emails** (and press Verify there if you want to nudge it).
+3. When the domain shows verified, I'll confirm the email queue is healthy and we can send a test login code to make sure codes actually land in the inbox.
+
+## What I'll do on my side
+
+While DNS propagates, once you've made the OVH change I will:
+- Re-check the email domain verification status.
+- Confirm the auth-email queue and the magic-link template are wired correctly so that, the moment the domain verifies, login codes flow.
+
+No code changes are needed for the fix itself — this is purely the OVH NS-record correction. Let me know once you've updated the records (or if OVH's interface won't let you add the trailing dot, tell me and I'll walk you through OVH's exact field behavior).

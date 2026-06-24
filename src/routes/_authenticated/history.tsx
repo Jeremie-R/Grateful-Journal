@@ -133,10 +133,70 @@ const TOKEN_VAR: Record<string, string> = {
   good: "var(--mood-good)",
 };
 
+/* greyscale palette for the "moments" donut, darkest -> lightest */
+const GREY_SCALE = ["#3f3f46", "#71717a", "#a1a1aa", "#cbd5e1", "#e4e4e7"];
+
+interface MomentSlice {
+  key: string;
+  label: string;
+  count: number;
+  pct: number;
+  fill: string;
+  iconColor: string;
+}
+
+const RADIAN = Math.PI / 180;
+
+function renderMomentIcon(props: {
+  cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number;
+  payload: MomentSlice;
+}) {
+  const { cx, cy, midAngle, innerRadius, outerRadius, payload } = props;
+  const r = innerRadius + (outerRadius - innerRadius) / 2;
+  const x = cx + r * Math.cos(-midAngle * RADIAN);
+  const y = cy + r * Math.sin(-midAngle * RADIAN);
+  const size = 16;
+  const def = specialByKey(payload.key);
+  if (!def) {
+    return (
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={13} fill={payload.iconColor}>
+        ⋯
+      </text>
+    );
+  }
+  const Icon = def.icon;
+  return <Icon x={x - size / 2} y={y - size / 2} width={size} height={size} color={payload.iconColor} />;
+}
+
 function YearView({ entries }: { entries: JournalEntry[] }) {
   const bars = useMemo(() => monthlyMoodBars(entries), [entries]);
   const specials = useMemo(() => specialDistribution(entries), [entries]);
+  const moments = useMemo<MomentSlice[]>(() => {
+    const total = specials.reduce((sum, s) => sum + s.count, 0) || 1;
+    const top = specials.slice(0, 4);
+    const restCount = specials.slice(4).reduce((sum, s) => sum + s.count, 0);
+    const arr: MomentSlice[] = top.map((s, i) => ({
+      key: s.key,
+      label: s.label,
+      count: s.count,
+      pct: Math.round((s.count / total) * 100),
+      fill: GREY_SCALE[i],
+      iconColor: i < 3 ? "#ffffff" : "#3f3f46",
+    }));
+    if (restCount > 0) {
+      arr.push({
+        key: "other",
+        label: "Other",
+        count: restCount,
+        pct: Math.round((restCount / total) * 100),
+        fill: GREY_SCALE[4],
+        iconColor: "#3f3f46",
+      });
+    }
+    return arr;
+  }, [specials]);
   const correlation = useMemo(() => specialMoodCorrelation(entries), [entries]);
+
 
   const hasData = entries.some((e) => e.mood != null);
   if (!hasData) return <Empty text="Not enough entries yet to show yearly trends." />;

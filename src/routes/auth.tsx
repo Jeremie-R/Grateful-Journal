@@ -192,7 +192,61 @@ function AuthPage() {
             </p>
           </form>
         )}
+
+        {/* Test / admin login bypass */}
+        <div className="mt-6 text-center">
+          {showDev ? (
+            <form onSubmit={testLogin} className="rounded-3xl border border-dashed border-border bg-card/60 p-5 text-left">
+              <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <KeyRound className="h-3.5 w-3.5" /> Test login
+              </p>
+              <input
+                type="email"
+                autoComplete="off"
+                value={devEmail}
+                onChange={(e) => setDevEmail(e.target.value)}
+                placeholder="admin email"
+                className="mb-2 w-full rounded-2xl border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-ring"
+              />
+              <input
+                type="password"
+                autoComplete="off"
+                value={devCode}
+                onChange={(e) => setDevCode(e.target.value)}
+                placeholder="admin code"
+                className="w-full rounded-2xl border border-input bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-ring"
+              />
+              {devError && <p className="mt-2 text-sm text-destructive">{devError}</p>}
+              <button
+                type="submit"
+                disabled={devBusy}
+                className="mt-3 w-full rounded-2xl bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {devBusy ? "Signing in…" : "Enter app"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDev(false);
+                  setDevError(null);
+                }}
+                className="mt-3 block w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowDev(true)}
+              className="text-xs font-medium text-muted-foreground/70 hover:text-foreground"
+            >
+              Test login
+            </button>
+          )}
+        </div>
       </div>
+
     </div>
   );
 }

@@ -188,9 +188,9 @@ function DayRow({ day }: { day: DayGroup }) {
     <div className="flex gap-3">
       {/* Date chip */}
       <div className="flex w-14 shrink-0 flex-col items-center pt-1">
-        <div className="grid h-14 w-14 place-items-center rounded-[1.4rem] rounded-tr-md bg-secondary">
+        <div className="flex h-14 w-14 flex-col items-center justify-center rounded-[1.4rem] rounded-tr-md bg-secondary">
           <span className="text-xl font-bold leading-none">{day.date.getDate()}</span>
-          <span className="mt-0.5 text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+          <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
             {DAY_NAMES[day.date.getDay()]}
           </span>
         </div>

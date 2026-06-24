@@ -76,29 +76,31 @@ function MonthView({ entries }: { entries: JournalEntry[] }) {
     () => entries.filter((e) => new Date(e.created_at).getTime() >= Date.now() - 30 * 864e5),
     [entries],
   );
-  const slices = useMemo(() => moodDistribution(recent), [recent]);
+  const slices = useMemo(
+    () => moodDistribution(recent).slice().sort((a, b) => b.level - a.level),
+    [recent],
+  );
 
   if (slices.length === 0) {
     return <Empty text="No moods logged in the last 30 days yet." />;
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl shadow-sm">
+    <div className="flex h-[calc(100dvh-12rem)] min-h-[24rem] flex-col overflow-hidden rounded-3xl shadow-sm">
       {slices.map((s) => (
         <div
           key={s.level}
-          className="flex items-center justify-between px-5"
+          className="flex items-center justify-between px-5 py-3"
           style={{
             background: `var(--mood-${s.token})`,
-            height: `${Math.max(64, s.pct * 3)}px`,
+            flexGrow: s.pct,
+            flexBasis: 0,
+            minHeight: 56,
           }}
         >
           <div className="flex items-center gap-3">
             <MoodFace level={s.level as 0 | 1 | 2 | 3 | 4} size={40} />
-            <div>
-              <div className="text-2xl font-bold leading-none">{s.pct}%</div>
-              <div className="text-xs text-foreground/60">{s.label}</div>
-            </div>
+            <div className="text-2xl font-medium leading-none">{s.pct}%</div>
           </div>
           <div className="flex gap-1.5">
             {s.topSpecials.map((key) => {

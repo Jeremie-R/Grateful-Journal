@@ -192,7 +192,73 @@ function JournalPage() {
   );
 }
 
-function DayRow({ day }: { day: DayGroup }) {
+function HomeScreenBanner() {
+  const installable = useIsInstallable();
+  const queryClient = useQueryClient();
+  const fetchProfile = useServerFn(getProfile);
+  const dismiss = useServerFn(dismissHomescreenPrompt);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => fetchProfile(),
+  });
+
+  const dismissMutation = useMutation({
+    mutationFn: () => dismiss(),
+    onMutate: () => {
+      queryClient.setQueryData(
+        ["profile"],
+        (prev: Record<string, unknown> | null | undefined) =>
+          prev ? { ...prev, homescreen_prompt_dismissed: true } : prev,
+      );
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["profile"] }),
+  });
+
+  if (!installable || !profile || profile.homescreen_prompt_dismissed) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="mb-5 flex items-center gap-3 rounded-2xl bg-card p-3.5 shadow-sm">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary text-foreground">
+          <Heart className="h-5 w-5" fill="currentColor" />
+        </span>
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="min-w-0 flex-1 text-left text-sm font-medium leading-snug"
+        >
+          Add Grateful to your home screen for one-tap journaling.
+        </button>
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground"
+        >
+          Add
+        </button>
+        <button
+          onClick={() => dismissMutation.mutate()}
+          aria-label="Dismiss"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/40 hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      <InstallInstructionsSheet
+        open={sheetOpen}
+        onClose={() => {
+          setSheetOpen(false);
+          dismissMutation.mutate();
+        }}
+      />
+    </>
+  );
+}
+
+
   return (
     <div className="flex gap-3">
       {/* Date chip */}

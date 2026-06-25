@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Heart, Mail, ArrowLeft, KeyRound } from "lucide-react";
 import { MoodFace } from "@/components/MoodFace";
 import { devLogin } from "@/lib/dev-auth.functions";
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — Grateful" },
-      { name: "description", content: "Sign in to your daily gratitude journal with a magic link." },
+      { name: "description", content: "Sign in to your daily gratitude journal with a magic link or Google." },
     ],
   }),
   component: AuthPage,
@@ -19,10 +20,9 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googleBusy, setGoogleBusy] = useState(false);
 
   // Test/admin login bypass
   const runDevLogin = useServerFn(devLogin);
@@ -60,6 +60,26 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  async function signInWithGoogle() {
+    setGoogleBusy(true);
+    setError(null);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError("Could not sign in with Google. Please try again.");
+        setGoogleBusy(false);
+        return;
+      }
+      if (result.redirected) return;
+      navigate({ to: "/" });
+    } catch {
+      setError("Could not sign in with Google. Please try again.");
+      setGoogleBusy(false);
+    }
+  }
+
   async function sendLink(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
@@ -77,24 +97,6 @@ function AuthPage() {
     }
   }
 
-  async function verifyCode(e: React.FormEvent) {
-    e.preventDefault();
-    const token = code.trim();
-    if (token.length < 6) return;
-    setVerifying(true);
-    setError(null);
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token,
-      type: "email",
-    });
-    if (error) {
-      setError(error.message);
-      setVerifying(false);
-    } else {
-      navigate({ to: "/" });
-    }
-  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6">

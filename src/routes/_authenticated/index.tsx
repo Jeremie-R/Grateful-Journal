@@ -262,14 +262,25 @@ function DayRow({ day }: { day: DayGroup }) {
   return (
     <div className="flex gap-3">
       {/* Date chip */}
-      <div className="flex w-14 shrink-0 flex-col items-center pt-1">
-        <div className="flex h-14 w-14 flex-col items-center justify-center rounded-2xl rounded-tr-md bg-secondary">
-          <span className="text-xl font-bold leading-none">{day.date.getDate()}</span>
-          <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
-            {DAY_NAMES[day.date.getDay()]}
-          </span>
+      <div className="flex w-16 shrink-0 flex-col items-center pt-1">
+        <div className="relative flex h-16 w-16 items-center justify-center">
+          <svg
+            viewBox="0 0 189 211"
+            className="absolute inset-0 h-full w-full text-secondary"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M148 12.3841C154.189 11.2581 159.43 15.643 159.896 22.3364L162.276 56.5228C162.46 59.1656 163.41 61.5621 164.992 63.3688L185.452 86.7401C189.458 91.316 189.04 99.0863 184.503 104.376L161.332 131.393C159.54 133.482 158.322 136.059 157.85 138.757L151.754 173.652C150.56 180.484 144.797 185.788 138.674 185.691L107.4 185.194C104.982 185.156 102.512 185.974 100.342 187.531L72.2797 207.672C66.7853 211.616 60.0172 210.46 56.9185 205.049L41.0921 177.413C39.8687 175.276 38.0066 173.719 35.7728 172.963L6.87598 163.184C1.21829 161.27 -1.45847 154.524 0.800699 147.874L12.3394 113.909C13.2314 111.283 13.38 108.522 12.7638 106.023L4.79281 73.6875C3.23218 67.3566 6.66239 60.1006 12.5782 57.219L42.7931 42.5013C45.1289 41.3635 47.1762 39.4791 48.6417 37.118L67.5988 6.57509C71.3104 0.595114 78.2646 -1.70724 83.3823 1.34956L109.521 16.9622C111.542 18.1692 113.946 18.5797 116.39 18.1352L148 12.3841Z" />
+          </svg>
+          <div className="relative flex flex-col items-center justify-center">
+            <span className="text-xl font-bold leading-none">{day.date.getDate()}</span>
+            <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+              {DAY_NAMES[day.date.getDay()]}
+            </span>
+          </div>
         </div>
       </div>
+
 
       {/* Stacked entries */}
       <div className="min-w-0 flex-1 space-y-2.5">

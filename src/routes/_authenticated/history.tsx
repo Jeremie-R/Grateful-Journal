@@ -134,8 +134,8 @@ const TOKEN_VAR: Record<string, string> = {
   good: "var(--mood-good)",
 };
 
-/* greyscale palette for the "moments" donut, darkest -> lightest */
-const GREY_SCALE = ["#3f3f46", "#71717a", "#a1a1aa", "#cbd5e1", "#e4e4e7"];
+/* pastel deep blue palette for the "moments" donut, darkest -> lightest */
+const MOMENT_BLUE = ["#93A5F3", "#A5B4F6", "#B7C3F8", "#C9D2FA", "#DBE1FB"];
 
 interface MomentSlice {
   key: string;
@@ -181,8 +181,8 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
       label: s.label,
       count: s.count,
       pct: Math.round((s.count / total) * 100),
-      fill: GREY_SCALE[i],
-      iconColor: i < 3 ? "#ffffff" : "#3f3f46",
+      fill: MOMENT_BLUE[i],
+      iconColor: i < 2 ? "#ffffff" : "#3f3f46",
     }));
     if (restCount > 0) {
       arr.push({
@@ -190,7 +190,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         label: "Other",
         count: restCount,
         pct: Math.round((restCount / total) * 100),
-        fill: GREY_SCALE[4],
+        fill: MOMENT_BLUE[4],
         iconColor: "#3f3f46",
       });
     }

@@ -181,8 +181,8 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
       label: s.label,
       count: s.count,
       pct: Math.round((s.count / total) * 100),
-      fill: GREY_SCALE[i],
-      iconColor: i < 3 ? "#ffffff" : "#3f3f46",
+      fill: MOMENT_BLUE[i],
+      iconColor: i < 2 ? "#ffffff" : "#3f3f46",
     }));
     if (restCount > 0) {
       arr.push({
@@ -190,7 +190,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         label: "Other",
         count: restCount,
         pct: Math.round((restCount / total) * 100),
-        fill: GREY_SCALE[4],
+        fill: MOMENT_BLUE[4],
         iconColor: "#3f3f46",
       });
     }

@@ -151,7 +151,7 @@ function JournalPage() {
       {isLoading ? (
         <div className="space-y-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-3xl bg-secondary/60" />
+            <div key={i} className="h-24 animate-pulse rounded-2xl bg-secondary/60" />
           ))}
         </div>
       ) : entries.length === 0 ? (
@@ -263,7 +263,7 @@ function DayRow({ day }: { day: DayGroup }) {
     <div className="flex gap-3">
       {/* Date chip */}
       <div className="flex w-14 shrink-0 flex-col items-center pt-1">
-        <div className="flex h-14 w-14 flex-col items-center justify-center rounded-[1.4rem] rounded-tr-md bg-secondary">
+        <div className="flex h-14 w-14 flex-col items-center justify-center rounded-2xl rounded-tr-md bg-secondary">
           <span className="text-xl font-bold leading-none">{day.date.getDate()}</span>
           <span className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
             {DAY_NAMES[day.date.getDay()]}
@@ -289,7 +289,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <button
       onClick={() => navigate({ to: "/entry/$id", params: { id: entry.id } })}
       aria-label={!hasBody && moodLabel ? `Feeling ${moodLabel.toLowerCase()}` : undefined}
-      className="block w-full rounded-3xl p-4 text-left transition-transform active:scale-[0.99]"
+      className="block w-full rounded-lg p-4 text-left transition-transform active:scale-[0.99]"
       style={{ backgroundColor: moodSoftColor(entry.mood) }}
     >
       <div className="flex items-center gap-2">

@@ -1,59 +1,33 @@
-# Fixing the email DNS so login codes send
+# Magic-link login + Sign in with Google
 
-## What's actually wrong
+Two changes: strip the 6-digit code flow back to a clean magic-link experience, and add a "Continue with Google" button using Lovable-managed Google OAuth (no secret needed).
 
-Your login-code (magic-link) emails are sent from the subdomain `notify.grateful.app.roberrini.com`. For that to work, you delegated this subdomain to Lovable's nameservers by adding two `NS` records at OVH.
+## 1. Revert to magic-link-only login
 
-The problem is in how OVH saved those `NS` values. The intended values are:
+**Sign-in page (`src/routes/auth.tsx`)**
+- Remove the code-entry state and `verifyCode` flow (the `code`, `verifying` state and the OTP-verify form).
+- Keep `signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } })` — this is what sends the magic link.
+- Replace the "Enter your code" success screen with a calm "Check your inbox" confirmation: tells the user we emailed a sign-in link to `{email}`, with a "Use a different email" button to go back.
+- Update button/helper copy from "Email me a sign-in code" → "Email me a sign-in link", and remove the "6-digit code" wording.
+- Leave the hidden Test login bypass untouched.
 
-```text
-ns7.lovable.cloud
-ns8.lovable.cloud
-```
+**Magic-link email (`src/lib/email-templates/magic-link.tsx`)**
+- Remove the optional code block (the `Or enter this code` section), leaving just the "Sign in" button. Email becomes link-only.
 
-But OVH stored them as:
+## 2. Add Sign in with Google (Lovable-managed)
 
-```text
-ns7.lovable.cloud.roberrini.com
-ns8.lovable.cloud.roberrini.com
-```
+- Enable the Google provider through Lovable Cloud's managed OAuth (no client ID/secret required — your uploaded credentials aren't needed for this path). This also generates the `@/integrations/lovable` helper module.
+- Add a "Continue with Google" button at the top of the sign-in card, with a subtle "or" divider above the email field. On click it calls:
+  ```ts
+  lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })
+  ```
+  handling the `redirected` / `error` results per the standard pattern.
+- Users can sign in with **either** Google or a magic link; email/password stays off.
 
-This is the classic OVH "missing trailing dot" trap: when an `NS` value is entered **without a trailing dot**, OVH treats it as a name *relative to your zone* and appends `.roberrini.com`. Those `ns7.lovable.cloud.roberrini.com` / `ns8.lovable.cloud.roberrini.com` hosts don't exist, so they have no A/AAAA records — which is exactly the anomaly OVH reported. Result: the subdomain never delegates to Lovable, DNS verification stays "Pending," and no email (including login codes) goes out.
+## Note on last night's email outage
+The magic link sends through the same email pipeline as before, so if the sending domain is still verifying, link delivery can still lag. Google sign-in is unaffected — it bypasses email entirely, so it doubles as a reliable fallback while DNS finishes verifying. After these changes I'll send a test magic link and confirm Google works.
 
-This is a DNS change at your registrar (OVH). I can't edit your OVH zone from here, so this part has to be done by you — but it's a 2-minute fix.
-
-## What you need to do at OVH
-
-1. Log in to OVH → your domain `roberrini.com` → **DNS zone**.
-2. Find the two `NS` records for the subdomain `notify.grateful.app` (they currently show targets ending in `ns7.lovable.cloud.roberrini.com` and `ns8.lovable.cloud.roberrini.com`).
-3. Edit each one so the target is the **fully qualified name with a trailing dot**:
-
-```text
-ns7.lovable.cloud.
-ns8.lovable.cloud.
-```
-
-The trailing dot is the important part — it tells OVH "this is the complete name, don't append my domain."
-
-4. Save / deploy the zone. OVH should stop reporting the "no address records" anomaly once the targets are correct.
-
-```text
-Subdomain:  notify.grateful.app   (i.e. notify.grateful.app.roberrini.com)
-Type:       NS
-Target 1:   ns7.lovable.cloud.    ← note the trailing dot
-Target 2:   ns8.lovable.cloud.    ← note the trailing dot
-```
-
-## After the DNS fix
-
-1. DNS changes can take anywhere from a few minutes up to 72 hours to propagate.
-2. Once propagated, the email domain verifies automatically. You can re-check status in **Cloud → Emails** (and press Verify there if you want to nudge it).
-3. When the domain shows verified, I'll confirm the email queue is healthy and we can send a test login code to make sure codes actually land in the inbox.
-
-## What I'll do on my side
-
-While DNS propagates, once you've made the OVH change I will:
-- Re-check the email domain verification status.
-- Confirm the auth-email queue and the magic-link template are wired correctly so that, the moment the domain verifies, login codes flow.
-
-No code changes are needed for the fix itself — this is purely the OVH NS-record correction. Let me know once you've updated the records (or if OVH's interface won't let you add the trailing dot, tell me and I'll walk you through OVH's exact field behavior).
+## Technical details
+- `supabase--configure_social_auth` with `providers: ["google"]` (managed broker; do not hand-edit `src/integrations/lovable`).
+- Google OAuth `redirect_uri` stays `window.location.origin` (public, same-origin) — never a protected route.
+- No DB or RLS changes. The uploaded `client_secret_*.json` is not stored in the repo or used (managed path chosen).

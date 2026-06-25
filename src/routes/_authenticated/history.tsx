@@ -208,7 +208,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Mood across the year
         </h2>
-        <div className="rounded-2xl bg-card p-3 shadow-sm">
+        <div className="rounded-lg bg-card p-3 shadow-sm">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={bars} barCategoryGap="20%">
               <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} />
@@ -228,7 +228,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Your most noted moments
           </h2>
-          <div className="rounded-2xl bg-card p-3 shadow-sm">
+          <div className="rounded-lg bg-card p-3 shadow-sm">
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
@@ -266,7 +266,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Moods behind each moment
           </h2>
-          <div className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
+          <div className="space-y-3 rounded-lg bg-card p-4 shadow-sm">
             {correlation.map((c) => {
               const Icon = specialByKey(c.key)!.icon;
               return (
@@ -377,7 +377,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
   return (
     <div className="space-y-6">
       {/* Nickname */}
-      <div className="rounded-2xl bg-card p-5 shadow-sm">
+      <div className="rounded-lg bg-card p-5 shadow-sm">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Nickname
         </div>
@@ -418,18 +418,18 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-card p-5 shadow-sm">
+        <div className="rounded-lg bg-card p-5 shadow-sm">
           <div className="text-3xl font-bold">{entries.length}</div>
           <div className="mt-1 text-xs text-muted-foreground">entries written</div>
         </div>
-        <div className="rounded-2xl bg-card p-5 shadow-sm">
+        <div className="rounded-lg bg-card p-5 shadow-sm">
           <div className="text-base font-semibold leading-tight">{startDate}</div>
           <div className="mt-1 text-xs text-muted-foreground">your journey began</div>
         </div>
       </div>
 
       {/* AI summary */}
-      <div className="rounded-2xl bg-card p-5 shadow-sm">
+      <div className="rounded-lg bg-card p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
           <h3 className="font-semibold">A gentle reflection</h3>
@@ -445,7 +445,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
         <button
           onClick={() => reflectMutation.mutate()}
           disabled={reflectMutation.isPending}
-          className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
         >
           <Sparkles className="h-4 w-4" />
           {reflectMutation.isPending ? "Reflecting…" : summary ? "Refresh reflection" : "Generate reflection"}
@@ -490,7 +490,7 @@ function ActionRow({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-2xl bg-card px-5 py-3.5 text-left text-sm font-medium shadow-sm transition-colors hover:bg-secondary ${
+      className={`flex w-full items-center gap-3 rounded-lg bg-card px-5 py-3.5 text-left text-sm font-medium shadow-sm transition-colors hover:bg-secondary ${
         danger ? "text-destructive" : "text-foreground"
       }`}
     >

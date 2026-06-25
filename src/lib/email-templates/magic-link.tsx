@@ -15,17 +15,15 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
-  token?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
-  token,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your sign-in link & code for {siteName}</Preview>
+    <Preview>Your sign-in link for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Welcome back to {siteName}</Heading>
@@ -38,12 +36,6 @@ export const MagicLinkEmail = ({
             Sign in
           </Button>
         </Section>
-        {token ? (
-          <Section style={codeSection}>
-            <Text style={codeLabel}>Or enter this code:</Text>
-            <Text style={codeStyle}>{token}</Text>
-          </Section>
-        ) : null}
         <Text style={footer}>
           If you didn't request this, you can safely ignore this email.
         </Text>

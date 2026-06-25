@@ -59,7 +59,7 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 1.25rem;
 
   /* Neutral base: soft off-white, charcoal text, grey chrome */
   --background: oklch(0.985 0.003 90);

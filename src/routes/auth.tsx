@@ -126,7 +126,7 @@ function AuthPage() {
         </div>
 
         {status === "sent" ? (
-          <div className="rounded-2xl bg-card p-7 text-center shadow-sm">
+          <div className="rounded-3xl bg-card p-7 text-center shadow-sm">
             <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full" style={{ background: "var(--mood-good-soft)" }}>
               <Mail className="h-6 w-6" />
             </div>
@@ -146,7 +146,7 @@ function AuthPage() {
             </button>
           </div>
         ) : (
-          <div className="rounded-2xl bg-card p-7 shadow-sm">
+          <div className="rounded-3xl bg-card p-7 shadow-sm">
             <button
               type="button"
               onClick={signInWithGoogle}
@@ -201,7 +201,7 @@ function AuthPage() {
         {/* Test / admin login bypass */}
         <div className="mt-6 text-center">
           {showDev ? (
-            <form onSubmit={testLogin} className="rounded-2xl border border-dashed border-border bg-card/60 p-5 text-left">
+            <form onSubmit={testLogin} className="rounded-3xl border border-dashed border-border bg-card/60 p-5 text-left">
               <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <KeyRound className="h-3.5 w-3.5" /> Test login
               </p>

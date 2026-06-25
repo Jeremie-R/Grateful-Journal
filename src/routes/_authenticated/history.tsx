@@ -429,7 +429,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
       </div>
 
       {/* AI summary */}
-      <div className="rounded-3xl bg-card p-5 shadow-sm">
+      <div className="rounded-2xl bg-card p-5 shadow-sm">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4" />
           <h3 className="font-semibold">A gentle reflection</h3>

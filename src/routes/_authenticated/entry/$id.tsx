@@ -22,7 +22,7 @@ function EditEntryPage() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-md px-4 pt-20">
-        <div className="h-64 animate-pulse rounded-3xl bg-secondary/60" />
+        <div className="h-64 animate-pulse rounded-2xl bg-secondary/60" />
       </div>
     );
   }

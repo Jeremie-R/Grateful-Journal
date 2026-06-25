@@ -1,29 +1,30 @@
-# Fix: Auth emails not sending
+# Quirky journal entry cards (radius only)
 
-## What's wrong
-Emails (magic link, signup) are correctly enqueued but are **never processed automatically**. They stay `pending` until the 15-minute TTL expires and then get dumped to the dead-letter queue — so users never receive them.
+Keep the existing entry cards exactly as they are — same mood-tinted background, mood face, special icons, gratitude text, and note. The only change is giving each card a **soft, slightly asymmetric border-radius** so they feel quirky and organic, in the same family as the date blob, without going so far that they look like blobs.
 
-Diagnosis evidence:
-- The four most recent emails were all `pending`; the three older ones had already aged out.
-- Manually calling the processor route worked instantly: it **sent** the most recent magic link and moved the expired ones to DLQ. So the route, the email domain (verified), and the Lovable API key are all healthy.
-- The scheduled trigger that hits the processor route every ~5 seconds is returning **403 Forbidden** — the service-role credential the scheduler presents no longer matches what the app expects (a stale credential after a key rotation).
+Based on your "level 2" choice, the effect stays subtle: corners stay close to the current `1rem`, just gently uneven.
 
-Net: the only broken link is the automatic queue trigger's credential. This matches the timing ("stopped last night").
+## What changes
 
-## The fix
-1. **Refresh the email queue infrastructure** — re-run the managed email infrastructure setup. This is idempotent and re-provisions:
-   - the `process-email-queue` scheduled job, and
-   - the stored service-role credential it uses to call the processor route.
-   This restores automatic sending without touching templates, the domain, or any app code.
+In `src/routes/_authenticated/index.tsx`, the `EntryCard` component:
 
-## Verification
-2. Send a real test magic-link sign-in to a test address and confirm the row in the send log transitions `pending -> sent` automatically (without any manual trigger), proving the scheduler is firing again.
-3. Confirm no new emails are getting stuck in `pending` or landing in the DLQ.
+- Replace the fixed `rounded-lg` with an inline asymmetric radius applied via `style`, e.g. roughly:
+  ```
+  borderRadius: "1.4rem 0.85rem 1.4rem 0.85rem"
+  ```
+  This keeps it soft and tappable but slightly off-balance, so it reads as quirky rather than a plain rounded rectangle.
 
-## Notes
-- The emails that already expired to the dead-letter queue (a couple of old signup/magic-link requests) cannot be resent retroactively — those users just need to request a fresh link, which will now work.
-- No changes to templates, auth settings, Google sign-in, the sender domain, or any application code are required.
+- To avoid every card looking identical, vary the radius gently per card. A small deterministic helper picks one of ~3 subtle radius presets based on the entry id (so a given entry always renders the same shape, no random reshuffle on re-render). All presets stay within the subtle range (corners between ~0.85rem and ~1.5rem).
 
-## Technical detail
-- Root cause: pg_cron job `process-email-queue` calls `/lovable/email/queue/process` with a Bearer service-role token stored in Vault (`email_queue_service_role_key`). That stored token is stale relative to the current `SUPABASE_SERVICE_ROLE_KEY`, so the route's token check returns 403 and nothing is ever dequeued.
-- Fix tool: `email_domain--setup_email_infra` (safe/idempotent; refreshes the Vault secret and cron job per the email infrastructure runbook). No migration or route edits needed.
+- The press interaction (`active:scale-[0.99]`) stays unchanged.
+
+## What stays the same
+
+- Colors, mood palette, fonts, spacing, icons, text.
+- The date blob, bottom nav, search, month nav, history page — untouched.
+- Card padding and content layout.
+
+## Technical notes
+
+- Pure presentation change in one file (`EntryCard`). No data, schema, or business-logic changes.
+- Radius applied through the existing `style` prop (the card already uses `style` for its background color), merged with the mood background.

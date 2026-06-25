@@ -134,8 +134,8 @@ const TOKEN_VAR: Record<string, string> = {
   good: "var(--mood-good)",
 };
 
-/* greyscale palette for the "moments" donut, darkest -> lightest */
-const GREY_SCALE = ["#3f3f46", "#71717a", "#a1a1aa", "#cbd5e1", "#e4e4e7"];
+/* pastel deep blue palette for the "moments" donut, darkest -> lightest */
+const MOMENT_BLUE = ["#93A5F3", "#A5B4F6", "#B7C3F8", "#C9D2FA", "#DBE1FB"];
 
 interface MomentSlice {
   key: string;

@@ -266,7 +266,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Moods behind each moment
           </h2>
-          <div className="space-y-3 rounded-3xl bg-card p-4 shadow-sm">
+          <div className="space-y-3 rounded-2xl bg-card p-4 shadow-sm">
             {correlation.map((c) => {
               const Icon = specialByKey(c.key)!.icon;
               return (
@@ -377,7 +377,7 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
   return (
     <div className="space-y-6">
       {/* Nickname */}
-      <div className="rounded-3xl bg-card p-5 shadow-sm">
+      <div className="rounded-2xl bg-card p-5 shadow-sm">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Nickname
         </div>
@@ -418,11 +418,11 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-3xl bg-card p-5 shadow-sm">
+        <div className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="text-3xl font-bold">{entries.length}</div>
           <div className="mt-1 text-xs text-muted-foreground">entries written</div>
         </div>
-        <div className="rounded-3xl bg-card p-5 shadow-sm">
+        <div className="rounded-2xl bg-card p-5 shadow-sm">
           <div className="text-base font-semibold leading-tight">{startDate}</div>
           <div className="mt-1 text-xs text-muted-foreground">your journey began</div>
         </div>

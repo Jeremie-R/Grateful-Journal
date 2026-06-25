@@ -82,23 +82,6 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const codeSection = {
-  textAlign: 'center' as const,
-  margin: '24px 0 8px',
-}
-const codeLabel = {
-  fontSize: '13px',
-  color: '#8a8a90',
-  margin: '0 0 6px',
-}
-const codeStyle = {
-  fontFamily: "'Quicksand', 'Courier New', monospace",
-  fontSize: '30px',
-  fontWeight: 'bold' as const,
-  letterSpacing: '8px',
-  color: '#2b2b2b',
-  margin: '0',
-}
 const footer = {
   fontSize: '12px',
   color: '#a8a8ae',

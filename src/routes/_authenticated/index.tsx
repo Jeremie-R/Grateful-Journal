@@ -292,6 +292,19 @@ function DayRow({ day }: { day: DayGroup }) {
   );
 }
 
+/** Subtle, quirky asymmetric radii — deterministic per entry id */
+const CARD_RADII = [
+  "1.45rem 0.85rem 1.45rem 0.85rem",
+  "0.85rem 1.5rem 0.9rem 1.45rem",
+  "1.5rem 0.9rem 1.4rem 0.85rem",
+];
+
+function radiusForId(id: string): string {
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  return CARD_RADII[sum % CARD_RADII.length];
+}
+
 function EntryCard({ entry }: { entry: JournalEntry }) {
   const navigate = useNavigate();
   const hasBody = !!entry.gratitude?.trim() || !!entry.note?.trim();
@@ -300,8 +313,11 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <button
       onClick={() => navigate({ to: "/entry/$id", params: { id: entry.id } })}
       aria-label={!hasBody && moodLabel ? `Feeling ${moodLabel.toLowerCase()}` : undefined}
-      className="block w-full rounded-lg p-4 text-left transition-transform active:scale-[0.99]"
-      style={{ backgroundColor: moodSoftColor(entry.mood) }}
+      className="block w-full p-4 text-left transition-transform active:scale-[0.99]"
+      style={{
+        backgroundColor: moodSoftColor(entry.mood),
+        borderRadius: radiusForId(entry.id),
+      }}
     >
       <div className="flex items-center gap-2">
         {entry.mood != null && (

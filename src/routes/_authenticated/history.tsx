@@ -57,7 +57,7 @@ function HistoryPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-72 animate-pulse rounded-2xl bg-secondary/60" />
+        <div className="h-72 animate-pulse rounded-lg bg-secondary/60" />
       ) : tab === "month" ? (
         <MonthView entries={entries} />
       ) : tab === "year" ? (

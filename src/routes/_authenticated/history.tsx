@@ -57,7 +57,7 @@ function HistoryPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-72 animate-pulse rounded-3xl bg-secondary/60" />
+        <div className="h-72 animate-pulse rounded-2xl bg-secondary/60" />
       ) : tab === "month" ? (
         <MonthView entries={entries} />
       ) : tab === "year" ? (
@@ -87,7 +87,7 @@ function MonthView({ entries }: { entries: JournalEntry[] }) {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-12rem)] min-h-[24rem] flex-col overflow-hidden rounded-3xl shadow-sm">
+    <div className="flex h-[calc(100dvh-12rem)] min-h-[24rem] flex-col overflow-hidden rounded-2xl shadow-sm">
       {slices.map((s) => (
         <div
           key={s.level}
@@ -208,7 +208,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Mood across the year
         </h2>
-        <div className="rounded-3xl bg-card p-3 shadow-sm">
+        <div className="rounded-2xl bg-card p-3 shadow-sm">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={bars} barCategoryGap="20%">
               <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} />
@@ -228,7 +228,7 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Your most noted moments
           </h2>
-          <div className="rounded-3xl bg-card p-3 shadow-sm">
+          <div className="rounded-2xl bg-card p-3 shadow-sm">
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie

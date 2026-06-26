@@ -119,22 +119,6 @@ export function EntryEditor({ existing }: EntryEditorProps) {
             ))}
           </div>
 
-          {/* Slider */}
-          <div className="mt-6 px-1">
-            <input
-              type="range"
-              min={0}
-              max={4}
-              step={1}
-              value={mood ?? 2}
-              onChange={(e) => setMood(Number(e.target.value) as MoodLevel)}
-              className="mood-slider w-full"
-              style={{
-                accentColor: mood != null ? (moodColor(mood) as string) : undefined,
-              }}
-              aria-label="Mood slider"
-            />
-          </div>
         </section>
 
         {/* What was special */}

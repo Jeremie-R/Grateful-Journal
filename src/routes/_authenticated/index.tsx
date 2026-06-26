@@ -170,11 +170,10 @@ function JournalPage() {
               }}
               className="scroll-mt-4"
             >
-              <div className="mb-3 flex items-center gap-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <div className="mb-3 text-center">
+                <span className="text-sm font-semibold tracking-normal text-muted-foreground">
                   {month.label}
                 </span>
-                <span className="h-px flex-1 bg-border" />
               </div>
 
               <div className="space-y-4">

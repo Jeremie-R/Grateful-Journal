@@ -419,11 +419,11 @@ function AboutView({ entries }: { entries: JournalEntry[] }) {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-lg bg-card p-5 shadow-sm">
-          <div className="text-3xl font-bold">{entries.length}</div>
+          <div className="text-2xl font-bold">{entries.length}</div>
           <div className="mt-1 text-xs text-muted-foreground">entries written</div>
         </div>
         <div className="rounded-lg bg-card p-5 shadow-sm">
-          <div className="text-3xl font-bold leading-tight">{startDate}</div>
+          <div className="text-2xl font-bold leading-tight">{startDate}</div>
           <div className="mt-1 text-xs text-muted-foreground">your journey began</div>
         </div>
       </div>

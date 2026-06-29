@@ -124,7 +124,7 @@ export function EntryEditor({ existing }: EntryEditorProps) {
         {/* What was special */}
         <section className="mt-9">
           <h2 className="text-center text-xl font-bold">What is special about today?</h2>
-          <div className="mt-5 grid grid-cols-4 gap-3">
+          <div className="mt-5 grid grid-cols-5 gap-3">
             {SPECIALS.map((s) => {
               const Icon = s.icon;
               const active = specials.includes(s.key);

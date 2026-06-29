@@ -72,56 +72,271 @@ function HistoryPage() {
   );
 }
 
-/* ---------- Last 30 days ---------- */
+/* ---------- Recently ---------- */
 function MonthView({ entries }: { entries: JournalEntry[] }) {
-  const recent = useMemo(
-    () => entries.filter((e) => new Date(e.created_at).getTime() >= Date.now() - 30 * 864e5),
-    [entries],
-  );
-  const slices = useMemo(
-    () => moodDistribution(recent).slice().sort((a, b) => b.level - a.level),
-    [recent],
-  );
+  const linePoints = useMemo(() => lastNEntriesMoods(entries, 12), [entries]);
+  const weights = useMemo(() => recentMoodWeights(entries, 14), [entries]);
+  const specials = useMemo(() => recentSpecialCounts(entries, 14), [entries]);
 
-  if (slices.length === 0) {
-    return <Empty text="No moods logged in the last 30 days yet." />;
+  const hasAnything =
+    linePoints.length > 0 || weights.length > 0 || specials.length > 0;
+  if (!hasAnything) {
+    return <Empty text="Nothing logged recently yet. Add an entry to see your vibe." />;
   }
 
   return (
-    <div className="flex h-[calc(100dvh-12rem)] min-h-[24rem] flex-col overflow-hidden rounded-2xl shadow-sm">
-      {slices.map((s) => (
-        <div
-          key={s.level}
-          className="flex items-center justify-between px-5 py-3"
-          style={{
-            background: `var(--mood-${s.token})`,
-            flexGrow: s.pct,
-            flexBasis: 0,
-            minHeight: 56,
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <MoodFace level={s.level as 0 | 1 | 2 | 3 | 4} size={40} />
-            <div className="text-2xl font-medium leading-none">{s.pct}%</div>
-          </div>
-          <div className="flex gap-1.5">
-            {s.topSpecials.map((key) => {
-              const def = specialByKey(key);
-              if (!def) return null;
-              const Icon = def.icon;
-              return (
-                <span
-                  key={key}
-                  className="grid h-8 w-8 place-items-center rounded-full bg-foreground/10 text-foreground/70"
-                  title={def.label}
-                >
-                  <Icon className="h-4 w-4" />
-                </span>
-              );
-            })}
-          </div>
+    <div className="space-y-8">
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          How you've been trending
+        </h2>
+        <div className="rounded-lg bg-card p-4 shadow-sm">
+          <MoodLine points={linePoints} />
         </div>
-      ))}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Your mood, last two weeks
+        </h2>
+        <MoodMesh weights={weights} />
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          What's been filling your days
+        </h2>
+        <div className="rounded-lg bg-card p-4 shadow-sm">
+          <MomentBubbles specials={specials} />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ---- Element width hook for the responsive SVG line ---- */
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    setWidth(el.clientWidth);
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) setWidth(e.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
+
+/* ---- 1. Emotional line chart (no axes, colored by mood value) ---- */
+function MoodLine({ points }: { points: { level: number; token: string }[] }) {
+  const { ref, width } = useElementWidth<HTMLDivElement>();
+  const height = 150;
+
+  if (points.length < 2) {
+    return (
+      <div ref={ref} className="grid h-[150px] place-items-center text-center">
+        <p className="max-w-xs text-sm text-muted-foreground">
+          Log a couple more moods to see your emotional trend.
+        </p>
+      </div>
+    );
+  }
+
+  const padX = 16;
+  const padY = 22;
+  const w = width || 320;
+  const innerW = Math.max(1, w - padX * 2);
+  const innerH = height - padY * 2;
+
+  const coords = points.map((p, i) => {
+    const x = padX + (points.length === 1 ? innerW / 2 : (i / (points.length - 1)) * innerW);
+    // level 0 (sad) at bottom, level 4 (good) at top
+    const y = padY + (1 - p.level / 4) * innerH;
+    return { x, y, token: p.token };
+  });
+
+  // Smooth path via Catmull-Rom -> cubic bezier
+  const d = smoothPath(coords);
+
+  return (
+    <div ref={ref} className="w-full">
+      <svg width="100%" height={height} viewBox={`0 0 ${w} ${height}`} aria-hidden>
+        <defs>
+          <linearGradient id="moodLineGrad" x1="0" y1="0" x2="1" y2="0">
+            {coords.map((c, i) => (
+              <stop
+                key={i}
+                offset={`${(i / (coords.length - 1)) * 100}%`}
+                stopColor={`var(--mood-${c.token})`}
+              />
+            ))}
+          </linearGradient>
+        </defs>
+        <path
+          d={d}
+          fill="none"
+          stroke="url(#moodLineGrad)"
+          strokeWidth={5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {coords.map((c, i) => (
+          <circle
+            key={i}
+            cx={c.x}
+            cy={c.y}
+            r={5}
+            fill={`var(--mood-${c.token})`}
+            stroke="var(--card)"
+            strokeWidth={2}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function smoothPath(pts: { x: number; y: number }[]): string {
+  if (pts.length < 2) return "";
+  const line = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    return { len: Math.hypot(dx, dy), angle: Math.atan2(dy, dx) };
+  };
+  const controlPoint = (
+    cur: { x: number; y: number },
+    prev: { x: number; y: number } | undefined,
+    next: { x: number; y: number } | undefined,
+    reverse?: boolean,
+  ) => {
+    const p = prev ?? cur;
+    const n = next ?? cur;
+    const smoothing = 0.18;
+    const o = line(p, n);
+    const angle = o.angle + (reverse ? Math.PI : 0);
+    const length = o.len * smoothing;
+    return { x: cur.x + Math.cos(angle) * length, y: cur.y + Math.sin(angle) * length };
+  };
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const cps = controlPoint(pts[i - 1], pts[i - 2], pts[i]);
+    const cpe = controlPoint(pts[i], pts[i - 1], pts[i + 1], true);
+    d += ` C ${cps.x} ${cps.y} ${cpe.x} ${cpe.y} ${pts[i].x} ${pts[i].y}`;
+  }
+  return d;
+}
+
+/* ---- 2. Mood "mesh" — Apple Card style blurred blend (last 14 days) ---- */
+const MESH_POS: Record<number, { x: number; y: number }> = {
+  0: { x: 22, y: 28 }, // sad — top-left
+  1: { x: 78, y: 24 }, // mild — top-right
+  2: { x: 50, y: 52 }, // average — center
+  3: { x: 26, y: 78 }, // okay — bottom-left
+  4: { x: 76, y: 76 }, // good — bottom-right
+};
+
+function MoodMesh({ weights }: { weights: { level: number; token: string; share: number }[] }) {
+  if (weights.length === 0) {
+    return (
+      <div className="grid h-[200px] place-items-center rounded-2xl bg-secondary/60 text-center">
+        <p className="max-w-xs text-sm text-muted-foreground">
+          No moods logged in the last two weeks.
+        </p>
+      </div>
+    );
+  }
+
+  const layers = weights
+    .slice()
+    .sort((a, b) => b.share - a.share)
+    .map((w) => {
+      const pos = MESH_POS[w.level] ?? { x: 50, y: 50 };
+      const radius = 30 + w.share * 55; // larger share -> larger glow
+      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, var(--mood-${w.token}) 0%, transparent ${radius}%)`;
+    })
+    .join(", ");
+
+  return (
+    <div className="relative h-[200px] overflow-hidden rounded-2xl shadow-sm">
+      <div
+        className="absolute -inset-8"
+        style={{ background: layers, filter: "blur(38px) saturate(1.15)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(circle at 50% 120%, rgba(255,255,255,0.18), transparent 60%)" }}
+      />
+    </div>
+  );
+}
+
+/* ---- 3. Overlapping moment bubbles (last 14 days) ---- */
+function MomentBubbles({ specials }: { specials: { key: string; label: string; count: number }[] }) {
+  if (specials.length === 0) {
+    return (
+      <div className="grid h-[160px] place-items-center text-center">
+        <p className="max-w-xs text-sm text-muted-foreground">
+          No moments noted in the last two weeks.
+        </p>
+      </div>
+    );
+  }
+
+  const maxCount = specials[0].count;
+  const GOLDEN = 2.399963229728653;
+  const raw = specials.map((s, i) => {
+    const r = 26 + 26 * Math.sqrt(s.count / maxCount);
+    if (i === 0) return { ...s, x: 0, y: 0, r, shade: 0 };
+    const dist = 1.55 * Math.sqrt(i) * 30;
+    return {
+      ...s,
+      x: Math.cos(i * GOLDEN) * dist,
+      y: Math.sin(i * GOLDEN) * dist,
+      r,
+      shade: i,
+    };
+  });
+
+  const minX = Math.min(...raw.map((b) => b.x - b.r));
+  const maxX = Math.max(...raw.map((b) => b.x + b.r));
+  const minY = Math.min(...raw.map((b) => b.y - b.r));
+  const maxY = Math.max(...raw.map((b) => b.y + b.r));
+  const boxW = maxX - minX;
+  const boxH = maxY - minY;
+  const height = 220;
+
+  return (
+    <div className="relative w-full" style={{ height }}>
+      {raw.map((b) => {
+        const shadeIdx = Math.min(b.shade, MOMENT_BLUE.length - 1);
+        const fill = MOMENT_BLUE[shadeIdx];
+        const iconColor = shadeIdx < 2 ? "#ffffff" : "#3f3f46";
+        const def = specialByKey(b.key);
+        const Icon = def?.icon;
+        const left = `calc(50% + ${(b.x - (minX + boxW / 2)) }px)`;
+        const top = `calc(50% + ${(b.y - (minY + boxH / 2)) }px)`;
+        void boxW; void boxH;
+        return (
+          <div
+            key={b.key}
+            className="absolute grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full shadow-sm"
+            style={{
+              left,
+              top,
+              width: b.r * 2,
+              height: b.r * 2,
+              background: fill,
+            }}
+            title={`${b.label} · ${b.count}`}
+          >
+            {Icon && <Icon style={{ width: b.r * 0.8, height: b.r * 0.8, color: iconColor }} />}
+          </div>
+        );
+      })}
     </div>
   );
 }

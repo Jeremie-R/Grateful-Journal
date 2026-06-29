@@ -282,7 +282,8 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   const raw = specials.map((s, i) => {
     const r = 26 + 26 * Math.sqrt(s.count / maxCount);
     if (i === 0) return { ...s, x: 0, y: 0, r, shade: 0 };
-    const dist = 1.55 * Math.sqrt(i) * 30;
+    // push satellites further out so they overlap only gently
+    const dist = 2.2 * Math.sqrt(i) * 34;
     return {
       ...s,
       x: Math.cos(i * GOLDEN) * dist,
@@ -298,7 +299,7 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   const maxY = Math.max(...raw.map((b) => b.y + b.r));
   const boxW = maxX - minX;
   const boxH = maxY - minY;
-  const height = 220;
+  const height = 240;
 
   return (
     <div className="relative w-full" style={{ height }}>
@@ -321,6 +322,9 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
               width: b.r * 2,
               height: b.r * 2,
               background: fill,
+              opacity: 0.8,
+              // biggest bubble sits on top, smaller satellites behind
+              zIndex: raw.length - b.shade,
             }}
             title={`${b.label} · ${b.count}`}
           >

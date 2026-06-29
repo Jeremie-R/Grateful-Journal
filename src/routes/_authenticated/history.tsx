@@ -85,31 +85,10 @@ function MonthView({ entries }: { entries: JournalEntry[] }) {
   }
 
   return (
-    <div className="space-y-8">
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          How you've been trending
-        </h2>
-        <div className="rounded-lg bg-card p-4 shadow-sm">
-          <MoodLine points={linePoints} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Your mood, last two weeks
-        </h2>
-        <MoodMesh weights={weights} />
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          What's been filling your days
-        </h2>
-        <div className="rounded-lg bg-card p-4 shadow-sm">
-          <MomentBubbles specials={specials} />
-        </div>
-      </section>
+    <div className="space-y-10">
+      <MoodLine points={linePoints} />
+      <MoodMesh weights={weights} />
+      <MomentBubbles specials={specials} />
     </div>
   );
 }
@@ -131,8 +110,13 @@ function useElementWidth<T extends HTMLElement>() {
   return { ref, width };
 }
 
+function shortDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
 /* ---- 1. Emotional line chart (no axes, colored by mood value) ---- */
-function MoodLine({ points }: { points: { level: number; token: string }[] }) {
+function MoodLine({ points }: { points: { level: number; token: string; created_at: string }[] }) {
   const { ref, width } = useElementWidth<HTMLDivElement>();
   const height = 150;
 
@@ -176,26 +160,33 @@ function MoodLine({ points }: { points: { level: number; token: string }[] }) {
             ))}
           </linearGradient>
         </defs>
-        <path
-          d={d}
-          fill="none"
-          stroke="url(#moodLineGrad)"
-          strokeWidth={5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {coords.map((c, i) => (
-          <circle
-            key={i}
-            cx={c.x}
-            cy={c.y}
-            r={5}
-            fill={`var(--mood-${c.token})`}
-            stroke="var(--card)"
-            strokeWidth={2}
+        <g style={{ filter: "saturate(1.6)" }}>
+          <path
+            d={d}
+            fill="none"
+            stroke="url(#moodLineGrad)"
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-        ))}
+
+          {coords.map((c, i) => (
+            <circle
+              key={i}
+              cx={c.x}
+              cy={c.y}
+              r={5}
+              fill={`var(--mood-${c.token})`}
+              stroke="var(--card)"
+              strokeWidth={2}
+            />
+          ))}
+        </g>
       </svg>
+      <div className="mt-2 flex justify-between px-1 text-xs text-muted-foreground">
+        <span>{shortDate(points[0].created_at)}</span>
+        <span>{shortDate(points[points.length - 1].created_at)}</span>
+      </div>
     </div>
   );
 }
@@ -255,8 +246,8 @@ function MoodMesh({ weights }: { weights: { level: number; token: string; share:
     .sort((a, b) => b.share - a.share)
     .map((w) => {
       const pos = MESH_POS[w.level] ?? { x: 50, y: 50 };
-      const radius = 30 + w.share * 55; // larger share -> larger glow
-      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, var(--mood-${w.token}) 0%, transparent ${radius}%)`;
+      const radius = 38 + w.share * 60; // larger share -> larger glow
+      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, var(--mood-${w.token}) 0%, color-mix(in oklch, var(--mood-${w.token}) 35%, transparent) ${radius * 0.6}%, transparent ${radius}%)`;
     })
     .join(", ");
 
@@ -264,11 +255,11 @@ function MoodMesh({ weights }: { weights: { level: number; token: string; share:
     <div className="relative h-[200px] overflow-hidden rounded-2xl shadow-sm">
       <div
         className="absolute -inset-8"
-        style={{ background: layers, filter: "blur(38px) saturate(1.15)" }}
+        style={{ background: layers, filter: "blur(34px) saturate(2.2)" }}
       />
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(circle at 50% 120%, rgba(255,255,255,0.18), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle at 50% 120%, rgba(255,255,255,0.12), transparent 60%)" }}
       />
     </div>
   );
@@ -291,7 +282,8 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   const raw = specials.map((s, i) => {
     const r = 26 + 26 * Math.sqrt(s.count / maxCount);
     if (i === 0) return { ...s, x: 0, y: 0, r, shade: 0 };
-    const dist = 1.55 * Math.sqrt(i) * 30;
+    // push satellites further out so they overlap only gently
+    const dist = 2.2 * Math.sqrt(i) * 34;
     return {
       ...s,
       x: Math.cos(i * GOLDEN) * dist,
@@ -307,7 +299,7 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   const maxY = Math.max(...raw.map((b) => b.y + b.r));
   const boxW = maxX - minX;
   const boxH = maxY - minY;
-  const height = 220;
+  const height = 240;
 
   return (
     <div className="relative w-full" style={{ height }}>
@@ -330,6 +322,9 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
               width: b.r * 2,
               height: b.r * 2,
               background: fill,
+              opacity: 0.8,
+              // biggest bubble sits on top, smaller satellites behind
+              zIndex: raw.length - b.shade,
             }}
             title={`${b.label} · ${b.count}`}
           >

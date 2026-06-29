@@ -246,8 +246,8 @@ function MoodMesh({ weights }: { weights: { level: number; token: string; share:
     .sort((a, b) => b.share - a.share)
     .map((w) => {
       const pos = MESH_POS[w.level] ?? { x: 50, y: 50 };
-      const radius = 30 + w.share * 55; // larger share -> larger glow
-      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, var(--mood-${w.token}) 0%, transparent ${radius}%)`;
+      const radius = 38 + w.share * 60; // larger share -> larger glow
+      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, var(--mood-${w.token}) 0%, color-mix(in oklch, var(--mood-${w.token}) 35%, transparent) ${radius * 0.6}%, transparent ${radius}%)`;
     })
     .join(", ");
 
@@ -255,11 +255,11 @@ function MoodMesh({ weights }: { weights: { level: number; token: string; share:
     <div className="relative h-[200px] overflow-hidden rounded-2xl shadow-sm">
       <div
         className="absolute -inset-8"
-        style={{ background: layers, filter: "blur(38px) saturate(1.15)" }}
+        style={{ background: layers, filter: "blur(34px) saturate(2.2)" }}
       />
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(circle at 50% 120%, rgba(255,255,255,0.18), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle at 50% 120%, rgba(255,255,255,0.12), transparent 60%)" }}
       />
     </div>
   );

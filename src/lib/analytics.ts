@@ -30,6 +30,22 @@ export function lastNEntriesMoods(entries: JournalEntry[], n: number): MoodPoint
     }));
 }
 
+/**
+ * All mood points logged within the last `days`, ordered oldest -> newest
+ * (so the most recent sits on the right of the line chart).
+ */
+export function recentMoodPoints(entries: JournalEntry[], days: number): MoodPoint[] {
+  return withinDays(entries, days)
+    .filter((e) => e.mood != null)
+    .slice()
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .map((e) => ({
+      level: e.mood as number,
+      token: MOOD_TOKENS[e.mood as number],
+      created_at: e.created_at,
+    }));
+}
+
 export interface MoodWeight {
   level: number;
   token: string;

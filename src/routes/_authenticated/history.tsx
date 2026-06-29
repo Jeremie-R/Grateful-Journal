@@ -13,7 +13,7 @@ import { deleteAllEntries } from "@/lib/entries.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   monthlyMoodBars, specialDistribution, specialMoodCorrelation,
-  lastNEntriesMoods, recentMoodWeights, recentSpecialCounts,
+  recentMoodPoints, recentMoodWeights, recentSpecialCounts,
 } from "@/lib/analytics";
 import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";

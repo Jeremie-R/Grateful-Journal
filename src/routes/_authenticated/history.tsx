@@ -170,18 +170,23 @@ function MoodLine({ points }: { points: { level: number; token: string; created_
             strokeLinejoin="round"
           />
 
-        {coords.map((c, i) => (
-          <circle
-            key={i}
-            cx={c.x}
-            cy={c.y}
-            r={5}
-            fill={`var(--mood-${c.token})`}
-            stroke="var(--card)"
-            strokeWidth={2}
-          />
-        ))}
+          {coords.map((c, i) => (
+            <circle
+              key={i}
+              cx={c.x}
+              cy={c.y}
+              r={5}
+              fill={`var(--mood-${c.token})`}
+              stroke="var(--card)"
+              strokeWidth={2}
+            />
+          ))}
+        </g>
       </svg>
+      <div className="mt-2 flex justify-between px-1 text-xs text-muted-foreground">
+        <span>{shortDate(points[0].created_at)}</span>
+        <span>{shortDate(points[points.length - 1].created_at)}</span>
+      </div>
     </div>
   );
 }

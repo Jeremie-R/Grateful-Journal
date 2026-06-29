@@ -5,6 +5,65 @@ export function withinDays(entries: JournalEntry[], days: number): JournalEntry[
   return entries.filter((e) => new Date(e.created_at).getTime() >= cutoff);
 }
 
+const MOOD_TOKENS = ["sad", "mild", "avg", "okay", "good"] as const;
+
+export interface MoodPoint {
+  level: number;
+  token: string;
+  created_at: string;
+}
+
+/**
+ * The last `n` entries that have a mood logged, ordered oldest -> newest
+ * (so the most recent sits on the right of the line chart).
+ */
+export function lastNEntriesMoods(entries: JournalEntry[], n: number): MoodPoint[] {
+  return entries
+    .filter((e) => e.mood != null)
+    .slice()
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .slice(-n)
+    .map((e) => ({
+      level: e.mood as number,
+      token: MOOD_TOKENS[e.mood as number],
+      created_at: e.created_at,
+    }));
+}
+
+export interface MoodWeight {
+  level: number;
+  token: string;
+  share: number; // 0..1
+}
+
+/** Per-mood share over the last `days`, only moods that appear, by level asc. */
+export function recentMoodWeights(entries: JournalEntry[], days: number): MoodWeight[] {
+  const recent = withinDays(entries, days).filter((e) => e.mood != null);
+  const total = recent.length || 1;
+  return MOODS.map((m) => {
+    const count = recent.filter((e) => e.mood === m.level).length;
+    return { level: m.level, token: m.token, share: count / total };
+  }).filter((w) => w.share > 0);
+}
+
+export interface RecentSpecial {
+  key: string;
+  label: string;
+  count: number;
+}
+
+/** Per-special counts over the last `days`, descending, only those present. */
+export function recentSpecialCounts(entries: JournalEntry[], days: number): RecentSpecial[] {
+  const recent = withinDays(entries, days);
+  return SPECIALS.map((s) => ({
+    key: s.key,
+    label: s.label,
+    count: recent.filter((e) => e.specials.includes(s.key)).length,
+  }))
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
+}
+
 export interface MoodSlice {
   level: number;
   token: string;

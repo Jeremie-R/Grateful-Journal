@@ -7,6 +7,8 @@ import {
   Zap,
   Utensils,
   Users,
+  Music,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 

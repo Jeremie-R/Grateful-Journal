@@ -13,7 +13,7 @@ import { deleteAllEntries } from "@/lib/entries.functions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   monthlyMoodBars, specialDistribution, specialMoodCorrelation,
-  lastNEntriesMoods, recentMoodWeights, recentSpecialCounts,
+  recentMoodPoints, recentMoodWeights, recentSpecialCounts,
 } from "@/lib/analytics";
 import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
@@ -74,7 +74,7 @@ function HistoryPage() {
 
 /* ---------- Recently ---------- */
 function MonthView({ entries }: { entries: JournalEntry[] }) {
-  const linePoints = useMemo(() => lastNEntriesMoods(entries, 12), [entries]);
+  const linePoints = useMemo(() => recentMoodPoints(entries, 14), [entries]);
   const weights = useMemo(() => recentMoodWeights(entries, 14), [entries]);
   const specials = useMemo(() => recentSpecialCounts(entries, 14), [entries]);
 
@@ -278,16 +278,18 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   }
 
   const maxCount = specials[0].count;
-  const GOLDEN = 2.399963229728653;
+  const petalCount = specials.length - 1;
   const raw = specials.map((s, i) => {
     const r = 26 + 26 * Math.sqrt(s.count / maxCount);
     if (i === 0) return { ...s, x: 0, y: 0, r, shade: 0 };
-    // push satellites further out so they overlap only gently
-    const dist = 2.2 * Math.sqrt(i) * 34;
+    // arrange the rest as petals evenly around the core flower
+    const coreR = 52; // max core radius
+    const angle = ((i - 1) / petalCount) * Math.PI * 2 - Math.PI / 2;
+    const dist = coreR + r * 0.7;
     return {
       ...s,
-      x: Math.cos(i * GOLDEN) * dist,
-      y: Math.sin(i * GOLDEN) * dist,
+      x: Math.cos(angle) * dist,
+      y: Math.sin(angle) * dist,
       r,
       shade: i,
     };
@@ -299,7 +301,7 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
   const maxY = Math.max(...raw.map((b) => b.y + b.r));
   const boxW = maxX - minX;
   const boxH = maxY - minY;
-  const height = 240;
+  const height = 260;
 
   return (
     <div className="relative w-full" style={{ height }}>

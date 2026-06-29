@@ -40,8 +40,8 @@ function HistoryPage() {
 
       <div className="mb-6 flex rounded-full bg-secondary p-1 text-sm font-medium">
         {([
-          ["month", "Last 30 days"],
-          ["year", "Last year"],
+          ["month", "Recently"],
+          ["year", "Over time"],
           ["about", "About you"],
         ] as [Tab, string][]).map(([key, label]) => (
           <button

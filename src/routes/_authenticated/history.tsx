@@ -74,7 +74,7 @@ function HistoryPage() {
 
 /* ---------- Recently ---------- */
 function MonthView({ entries }: { entries: JournalEntry[] }) {
-  const linePoints = useMemo(() => lastNEntriesMoods(entries, 12), [entries]);
+  const linePoints = useMemo(() => recentMoodPoints(entries, 14), [entries]);
   const weights = useMemo(() => recentMoodWeights(entries, 14), [entries]);
   const specials = useMemo(() => recentSpecialCounts(entries, 14), [entries]);
 

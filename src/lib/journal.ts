@@ -7,6 +7,8 @@ import {
   Zap,
   Utensils,
   Users,
+  Music,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +64,8 @@ export const SPECIALS: SpecialDef[] = [
   { key: "energy", label: "Energy", icon: Zap },
   { key: "food", label: "Food", icon: Utensils },
   { key: "friends", label: "Friends", icon: Users },
+  { key: "music", label: "Music", icon: Music },
+  { key: "work", label: "Work", icon: Briefcase },
 ];
 
 export function specialByKey(key: string): SpecialDef | undefined {

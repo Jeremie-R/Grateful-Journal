@@ -317,9 +317,9 @@ function MomentBubbles({ specials }: { specials: { key: string; label: string; c
         const iconColor = shadeIdx < 2 ? "#ffffff" : "#3f3f46";
         const def = specialByKey(b.key);
         const Icon = def?.icon;
-        const left = `calc(50% + ${(b.x - (minX + boxW / 2)) }px)`;
-        const top = `calc(50% + ${(b.y - (minY + boxH / 2)) }px)`;
-        void boxW; void boxH;
+        const left = `calc(50% + ${b.x - (minX + boxW / 2)}px)`;
+        const top = `calc(50% + ${b.y - (minY + boxH / 2)}px)`;
+
         return (
           <div
             key={b.key}

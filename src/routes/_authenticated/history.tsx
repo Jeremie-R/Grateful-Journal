@@ -85,31 +85,10 @@ function MonthView({ entries }: { entries: JournalEntry[] }) {
   }
 
   return (
-    <div className="space-y-8">
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          How you've been trending
-        </h2>
-        <div className="rounded-lg bg-card p-4 shadow-sm">
-          <MoodLine points={linePoints} />
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Your mood, last two weeks
-        </h2>
-        <MoodMesh weights={weights} />
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          What's been filling your days
-        </h2>
-        <div className="rounded-lg bg-card p-4 shadow-sm">
-          <MomentBubbles specials={specials} />
-        </div>
-      </section>
+    <div className="space-y-10">
+      <MoodLine points={linePoints} />
+      <MoodMesh weights={weights} />
+      <MomentBubbles specials={specials} />
     </div>
   );
 }

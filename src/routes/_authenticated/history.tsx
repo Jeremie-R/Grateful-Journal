@@ -110,8 +110,13 @@ function useElementWidth<T extends HTMLElement>() {
   return { ref, width };
 }
 
+function shortDate(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
 /* ---- 1. Emotional line chart (no axes, colored by mood value) ---- */
-function MoodLine({ points }: { points: { level: number; token: string }[] }) {
+function MoodLine({ points }: { points: { level: number; token: string; created_at: string }[] }) {
   const { ref, width } = useElementWidth<HTMLDivElement>();
   const height = 150;
 
@@ -155,14 +160,16 @@ function MoodLine({ points }: { points: { level: number; token: string }[] }) {
             ))}
           </linearGradient>
         </defs>
-        <path
-          d={d}
-          fill="none"
-          stroke="url(#moodLineGrad)"
-          strokeWidth={5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <g style={{ filter: "saturate(1.6)" }}>
+          <path
+            d={d}
+            fill="none"
+            stroke="url(#moodLineGrad)"
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
         {coords.map((c, i) => (
           <circle
             key={i}

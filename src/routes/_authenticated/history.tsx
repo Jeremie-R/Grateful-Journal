@@ -425,19 +425,17 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Mood across the year
         </h2>
-        <div className="rounded-lg bg-card p-3 shadow-sm">
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={bars} barCategoryGap="20%">
-              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} />
-              <Tooltip cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }} />
-              <Bar dataKey="sad" stackId="m" fill={TOKEN_VAR.sad} />
-              <Bar dataKey="mild" stackId="m" fill={TOKEN_VAR.mild} />
-              <Bar dataKey="avg" stackId="m" fill={TOKEN_VAR.avg} />
-              <Bar dataKey="okay" stackId="m" fill={TOKEN_VAR.okay} />
-              <Bar dataKey="good" stackId="m" fill={TOKEN_VAR.good} radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={bars} barCategoryGap="20%">
+            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} />
+            <Tooltip cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }} />
+            <Bar dataKey="sad" stackId="m" fill={TOKEN_VAR.sad} maxBarSize={48} />
+            <Bar dataKey="mild" stackId="m" fill={TOKEN_VAR.mild} maxBarSize={48} />
+            <Bar dataKey="avg" stackId="m" fill={TOKEN_VAR.avg} maxBarSize={48} />
+            <Bar dataKey="okay" stackId="m" fill={TOKEN_VAR.okay} maxBarSize={48} />
+            <Bar dataKey="good" stackId="m" fill={TOKEN_VAR.good} radius={[6, 6, 0, 0]} maxBarSize={48} />
+          </BarChart>
+        </ResponsiveContainer>
       </section>
 
       {moments.length > 0 && (

@@ -359,28 +359,6 @@ interface MomentSlice {
   iconColor: string;
 }
 
-const RADIAN = Math.PI / 180;
-
-function renderMomentIcon(props: {
-  cx: number; cy: number; midAngle: number; innerRadius: number; outerRadius: number;
-  payload: MomentSlice;
-}) {
-  const { cx, cy, midAngle, innerRadius, outerRadius, payload } = props;
-  const r = innerRadius + (outerRadius - innerRadius) / 2;
-  const x = cx + r * Math.cos(-midAngle * RADIAN);
-  const y = cy + r * Math.sin(-midAngle * RADIAN);
-  const size = 16;
-  const def = specialByKey(payload.key);
-  if (!def) {
-    return (
-      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={13} fill={payload.iconColor}>
-        ⋯
-      </text>
-    );
-  }
-  const Icon = def.icon;
-  return <Icon x={x - size / 2} y={y - size / 2} width={size} height={size} color={payload.iconColor} />;
-}
 
 function YearView({ entries }: { entries: JournalEntry[] }) {
   const bars = useMemo(() => {

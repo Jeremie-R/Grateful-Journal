@@ -383,7 +383,11 @@ function renderMomentIcon(props: {
 }
 
 function YearView({ entries }: { entries: JournalEntry[] }) {
-  const bars = useMemo(() => monthlyMoodBars(entries), [entries]);
+  const bars = useMemo(() => {
+    const all = monthlyMoodBars(entries);
+    const firstIdx = all.findIndex((b) => b.sad + b.mild + b.avg + b.okay + b.good > 0);
+    return firstIdx === -1 ? [] : all.slice(firstIdx);
+  }, [entries]);
   const specials = useMemo(() => specialDistribution(entries), [entries]);
   const moments = useMemo<MomentSlice[]>(() => {
     const total = specials.reduce((sum, s) => sum + s.count, 0) || 1;

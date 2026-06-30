@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  BarChart, Bar, XAxis, ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
+  BarChart, Bar, XAxis, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { Sparkles, Download, RotateCcw, Trash2, LogOut, Pencil, Check, Smartphone } from "lucide-react";
 import { listEntries } from "@/lib/entries.functions";

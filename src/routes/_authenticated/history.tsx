@@ -443,34 +443,26 @@ function YearView({ entries }: { entries: JournalEntry[] }) {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Your most noted moments
           </h2>
-          <div className="rounded-lg bg-card p-3 shadow-sm">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={moments}
-                  dataKey="count"
-                  nameKey="label"
-                  innerRadius={45}
-                  outerRadius={85}
-                  paddingAngle={2}
-                  startAngle={90}
-                  endAngle={-270}
-                  labelLine={false}
-                  label={renderMomentIcon}
+          <div className="flex h-10 w-full overflow-hidden rounded-full">
+            {moments.map((s) => {
+              const def = specialByKey(s.key);
+              const Icon = def?.icon;
+              return (
+                <div
+                  key={s.key}
+                  className="flex items-center justify-center"
+                  style={{ width: `${s.pct}%`, background: s.fill }}
+                  title={`${s.label} · ${s.pct}%`}
                 >
-                  {moments.map((s) => (
-                    <Cell key={s.key} fill={s.fill} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(_v, _n, item: { payload?: MomentSlice }) => [
-                    `${item.payload?.pct}%`,
-                    item.payload?.label,
-                  ]}
-                  contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                  {s.pct >= 10 &&
+                    (Icon ? (
+                      <Icon className="h-4 w-4" style={{ color: s.iconColor }} />
+                    ) : (
+                      <span style={{ color: s.iconColor }}>⋯</span>
+                    ))}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

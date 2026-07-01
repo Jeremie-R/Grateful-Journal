@@ -87,8 +87,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Grateful — a daily gratitude journal" },
       { name: "twitter:description", content: "A calm, simple space to note what you're grateful for each day and gently track your mood over time." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4dff394a-69bf-4815-b893-164d1b094cca/id-preview-fe0880b1--1e6e53d7-4865-46d9-9dca-9837e4ee30b0.lovable.app-1782293804173.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4dff394a-69bf-4815-b893-164d1b094cca/id-preview-fe0880b1--1e6e53d7-4865-46d9-9dca-9837e4ee30b0.lovable.app-1782293804173.png" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/ErHcbu28iBhLrB6SOMgbS2hkZgf2/social-images/social-1782912491309-GratefulDemo.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/ErHcbu28iBhLrB6SOMgbS2hkZgf2/social-images/social-1782912491309-GratefulDemo.webp" },
       // PWA / iOS home-screen standalone app
       { name: "theme-color", content: "#f7f3ed" },
       { name: "apple-mobile-web-app-capable", content: "yes" },

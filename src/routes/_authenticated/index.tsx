@@ -96,8 +96,12 @@ function JournalPage() {
   const months = useMemo(() => groupEntries(filtered), [filtered]);
   const allMonths = useMemo(() => groupEntries(entries), [entries]);
 
+  const navigate = useNavigate();
+  const swipe = useSwipe({ onSwipeLeft: () => navigate({ to: "/history" }) });
+
   return (
-    <div className="mx-auto min-h-screen max-w-md px-4 pb-28 pt-5">
+    <div {...swipe} className="mx-auto min-h-screen max-w-md px-4 pb-28 pt-5">
+
       {/* Header */}
       <header className="mb-4 flex items-center justify-between">
         <h1 className="flex items-center gap-1.5 text-2xl font-bold tracking-tight">

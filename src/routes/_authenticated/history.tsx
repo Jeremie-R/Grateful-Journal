@@ -19,6 +19,8 @@ import { specialByKey, type JournalEntry } from "@/lib/journal";
 import { MoodFace } from "@/components/MoodFace";
 import { BottomNav } from "@/components/BottomNav";
 import { InstallInstructionsSheet } from "@/components/AddToHomeScreen";
+import { useSwipe } from "@/hooks/use-swipe";
+
 
 export const Route = createFileRoute("/_authenticated/history")({
   component: HistoryPage,

@@ -17,6 +17,8 @@ import {
   InstallInstructionsSheet,
   useIsInstallable,
 } from "@/components/AddToHomeScreen";
+import { useSwipe } from "@/hooks/use-swipe";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   component: JournalPage,

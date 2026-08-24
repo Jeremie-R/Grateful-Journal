@@ -34,10 +34,25 @@ function HistoryPage() {
   });
   const [tab, setTab] = useState<Tab>("month");
   const entries = (data ?? []) as JournalEntry[];
+  const navigate = useNavigate();
+
+  const TAB_ORDER: Tab[] = ["month", "year", "about"];
+  const swipe = useSwipe({
+    onSwipeLeft: () => {
+      const i = TAB_ORDER.indexOf(tab);
+      if (i < TAB_ORDER.length - 1) setTab(TAB_ORDER[i + 1]);
+    },
+    onSwipeRight: () => {
+      const i = TAB_ORDER.indexOf(tab);
+      if (i > 0) setTab(TAB_ORDER[i - 1]);
+      else navigate({ to: "/" });
+    },
+  });
 
   return (
-    <div className="mx-auto min-h-screen max-w-md px-4 pb-28 pt-5">
+    <div {...swipe} className="mx-auto min-h-screen max-w-md px-4 pb-28 pt-5">
       <h1 className="mb-4 text-2xl font-bold tracking-tight">History</h1>
+
 
       <div className="mb-6 flex rounded-full bg-secondary p-1 text-sm font-medium">
         {([

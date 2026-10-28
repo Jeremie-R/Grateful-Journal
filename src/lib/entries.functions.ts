@@ -34,6 +34,7 @@ const SaveSchema = z.object({
   specials: SpecialsSchema,
   gratitude: z.string().max(4000).nullable(),
   note: z.string().max(4000).nullable(),
+  created_at: z.string().datetime().optional(),
 });
 
 export const saveEntry = createServerFn({ method: "POST" })
@@ -45,6 +46,7 @@ export const saveEntry = createServerFn({ method: "POST" })
       specials: data.specials,
       gratitude: data.gratitude,
       note: data.note,
+      ...(data.created_at ? { created_at: data.created_at } : {}),
     };
 
     if (data.id) {

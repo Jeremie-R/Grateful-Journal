@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Check, Trash2 } from "lucide-react";
+import { X, Check, Trash2, CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   MOODS,
   SPECIALS,
@@ -34,6 +36,10 @@ export function EntryEditor({ existing }: EntryEditorProps) {
       : GRATITUDE_PREFIX,
   );
   const [note, setNote] = useState<string>(existing?.note ?? "");
+  const [entryDate, setEntryDate] = useState<Date>(
+    () => new Date(existing?.created_at ?? Date.now()),
+  );
+  const [dateOpen, setDateOpen] = useState(false);
 
   const saveMutation = useMutation({
     mutationFn: () =>
@@ -47,6 +53,7 @@ export function EntryEditor({ existing }: EntryEditorProps) {
               ? null
               : gratitude.trim(),
           note: note.trim() === "" ? null : note.trim(),
+          created_at: entryDate.toISOString(),
         },
       }),
     onSuccess: () => {
@@ -69,10 +76,24 @@ export function EntryEditor({ existing }: EntryEditorProps) {
     );
   }
 
-  const todayLabel = new Date(existing?.created_at ?? Date.now()).toLocaleDateString(
-    undefined,
-    { weekday: "long", month: "long", day: "numeric" },
-  );
+  const todayLabel = entryDate.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  function pickDate(d: Date | undefined) {
+    if (!d) return;
+    const next = new Date(d);
+    next.setHours(
+      entryDate.getHours(),
+      entryDate.getMinutes(),
+      entryDate.getSeconds(),
+      entryDate.getMilliseconds(),
+    );
+    setEntryDate(next);
+    setDateOpen(false);
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -98,7 +119,28 @@ export function EntryEditor({ existing }: EntryEditorProps) {
           >
             <X className="h-5 w-5" />
           </button>
-          <span className="text-sm font-medium text-muted-foreground">{todayLabel}</span>
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
+            <PopoverTrigger asChild>
+              <button
+                aria-label="Change date"
+                className="inline-flex items-center gap-1.5 rounded-full bg-card/70 px-3 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {todayLabel}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={entryDate}
+                onSelect={pickDate}
+                disabled={{ after: new Date() }}
+                defaultMonth={entryDate}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
           <div className="w-10" />
         </div>
 
